@@ -2,7 +2,7 @@ local sounds = require("__base__.prototypes.entity.sounds")
 
 local dock = {
     -- Type radar so that we have an animation to work with
-    type = "radar",
+    type = "accumulator",
     name = "spidertron-dock",
     icon = "__base__/graphics/icons/centrifuge.png",
     minable = {mining_time = 0.1, result = "spidertron-dock"},
@@ -10,67 +10,68 @@ local dock = {
     flags = {"placeable-player", "player-creation"},
     max_health = 250,
     corpse = "medium-remnants",
-    dying_explosion = "radar-explosion",
+    dying_explosion = "medium-explosion",
     collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
     selection_box = {{-1, -1}, {1, 1}},
-    -- damaged_trigger_effect = hit_effects.entity(),
-    energy_per_sector = "10MJ",
-    max_distance_of_sector_revealed = 1,
-    max_distance_of_nearby_sector_revealed = 1,
+    charge_cooldown = 30,
+    discharge_cooldown = 60,
     energy_per_nearby_scan = "1J",
-    energy_source =
-    {
+    energy_source = {
       type = "void",
-      usage_priority = "secondary-input"
+      buffer_capacity = "1J",
+      usage_priority = "tertiary",
+      input_flow_limit = "300kW",
+      output_flow_limit = "300kW",
+      render_no_network_icon = false,
+      render_no_power_icon = false,
     },
-    energy_usage = "300kW",
-    pictures =
+    picture =
     {
-        layers =
+      layers =
+      {
         {
-          {
-                -- Using "HR" for both, since it's more like halfway between
-                -- high and normal resolution
-                filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
-                priority = "low",
-                width = 113,
-                height = 120,
-                direction_count = 1,
-                shift = util.by_pixel(-4, -4),
-                scale = 0.6,
-                hr_version = {
-                    filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
-                    priority = "low",
-                    width = 113,
-                    height = 120,
-                    direction_count = 1,
-                    shift = util.by_pixel(-4, -4),
-                    scale = 0.6,
-                }
-            },
-            {
               -- Using "HR" for both, since it's more like halfway between
               -- high and normal resolution
-              filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+              filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
               priority = "low",
-              width = 126,
-              height = 80,
+              width = 113,
+              height = 120,
               direction_count = 1,
-              shift = util.by_pixel(20, 6),
+              shift = util.by_pixel(-4, -4),
               scale = 0.6,
-              draw_as_shadow = true,
               hr_version = {
-                  filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+                  filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
                   priority = "low",
-                  width = 126,
-                  height = 80,
+                  width = 113,
+                  height = 120,
                   direction_count = 1,
-                  shift = util.by_pixel(20, 6),
+                  shift = util.by_pixel(-4, -4),
                   scale = 0.6,
-                  draw_as_shadow = true,
               }
-            },
-        }
+          },
+          {
+            -- Using "HR" for both, since it's more like halfway between
+            -- high and normal resolution
+            filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+            priority = "low",
+            width = 126,
+            height = 80,
+            direction_count = 1,
+            shift = util.by_pixel(20, 6),
+            scale = 0.6,
+            draw_as_shadow = true,
+            hr_version = {
+                filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+                priority = "low",
+                width = 126,
+                height = 80,
+                direction_count = 1,
+                shift = util.by_pixel(20, 6),
+                scale = 0.6,
+                draw_as_shadow = true,
+            }
+          },
+      }
     },
     vehicle_impact_sound = sounds.generic_impact,
     working_sound =
@@ -82,9 +83,11 @@ local dock = {
           volume = 0.8
         }
       },
-    max_sounds_per_type = 3,
-    --audible_distance_modifier = 0.8,
-    use_doppler_shift = false
+      --persistent = true,
+      max_sounds_per_type = 3,
+      audible_distance_modifier = 0.5,
+      fade_in_ticks = 4,
+      fade_out_ticks = 20
     },
     radius_minimap_visualisation_color = { r = 0.059, g = 0.092, b = 0.235, a = 0.275 },
     rotation_speed = 0.01,

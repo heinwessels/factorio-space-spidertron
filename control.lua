@@ -22,9 +22,29 @@ function create_dock_data(dock_entity)
     return {
         occupied = false,
         serialized_spider = nil,
+        docked_sprites = {},
+
+        -- Can be nil when something goes wrong
         dock_entity = dock_entity,
-        docked_sprites = {}
     }
+end
+
+function get_dock_data_from_entity(dock)
+    local dock_data = global.docks[dock.unit_number]
+    if not dock_data then
+        global.docks[dock.unit_number] = create_dock_data(dock)
+        dock_data = global.docks[dock.unit_number]
+    end
+    return dock_data
+end
+
+function get_dock_data_from_unit_number(dock_unit_number)
+    local dock_data = global.docks[dock_unit_number]
+    if not dock_data then
+        global.docks[dock_unit_number] = create_dock_data(dock)
+        dock_data = global.docks[dock_unit_number]
+    end
+    return dock_data
 end
 
 function draw_docked_spider(dock_data, spider)
@@ -83,20 +103,19 @@ function attempt_dock(spider)
     if dock.force ~= spider.force then return end
 
     -- Check if dock is occupied
-    local dock_data = global.docks[dock.unit_number]
-    if dock_data then
-        if dock_data.occupied then return end
-    else
-        -- Data does not yet exist. Creat it now
-        dock_data = create_dock_data(dock)
-        global.docks[dock.unit_number] = dock_data
-    end
+    local dock_data = get_dock_data_from_entity(dock)
+    if dock_data.occupied then return end
 
     -- Dock the spider!
     draw_docked_spider(dock_data, spider)
     dock_data.serialized_spider = spidertron_lib.serialise_spidertron(spider)
     spider.destroy()
     dock_data.occupied = true
+
+    -- Update GUI's for all players
+    for _, player in pairs(game.players) do
+        update_dock_gui_for_player(player, dock)
+    end
 end
 
 function attempt_undock(dock_data)
@@ -104,6 +123,7 @@ function attempt_undock(dock_data)
     if not dock_data.serialized_spider then return end
     local serialized_spider = dock_data.serialized_spider
     local dock = dock_data.dock_entity
+    if not dock then error("dock_data had no associated entity") end
 
     -- Create a empty spider and apply the
     -- serialized spider onto that spider
@@ -126,7 +146,12 @@ function attempt_undock(dock_data)
     for _, sprite in pairs(dock_data.docked_sprites) do
         rendering.destroy(sprite)
     end
-    dock_data.docked_sprites = {}    
+    dock_data.docked_sprites = {}
+
+    -- Destroy GUI for all players
+    for _, player in pairs(game.players) do
+        update_dock_gui_for_player(player, dock)
+    end
 end
 
 script.on_event(defines.events.on_spider_command_completed, 
@@ -139,17 +164,6 @@ script.on_event(defines.events.on_spider_command_completed,
     end
 )
 
--- Setup Handlers
-script.on_event(defines.events.on_tick, function (event) 
-    -- HACK! REMOVE THIS CODE!
-    if game.tick % 600 == 0 then
-        if not global.docks then global.docks = {} end
-        for _, dock_data in pairs(global.docks) do
-            attempt_undock(dock_data)
-        end
-    end
-end)
-
 function on_built(event)
     -- If it's a space spidertron, set it to white as default
     local entity = event.created_entity
@@ -160,5 +174,58 @@ function on_built(event)
     end
 end
 
+function update_dock_gui_for_player(player, dock)
+    -- Get dock data
+    local dock_data = get_dock_data_from_entity(dock)
+    
+    -- Destroy whatever is there currently
+    for _, elem in pairs(player.gui.relative.children) do
+        if elem.name == "dock-frame" then elem.destroy() end
+    end
+    
+    if dock_data.occupied then
+        -- Build a new gui!
+        -- TODO Need to update this when something docks
+
+        -- Build starting frame
+        local anchor = {
+            gui=defines.relative_gui_type.accumulator_gui, 
+            position=defines.relative_gui_position.right
+        }
+        local frame = player.gui.relative.add{name="dock-frame", type="frame", anchor=anchor}
+
+        -- Add button
+        frame.add{
+            type = "button",
+            name = "spidertron-undock-button",
+            caption = {"space-spidertron-dock.undock"},
+            style = "green_button",
+            tags = {
+                dock_unit_number = dock.unit_number
+            }
+        }
+    end
+
+end
+
 script.on_event(defines.events.on_robot_built_entity, on_built)
 script.on_event(defines.events.on_built_entity, on_built)
+
+script.on_event(defines.events.on_gui_opened, function(event)
+    if event.gui_type == defines.gui_type.entity 
+            and event.entity.name == "spidertron-dock" then
+        update_dock_gui_for_player(
+            game.get_player(event.player_index),
+            event.entity
+        )
+    end
+end)
+
+script.on_event(defines.events.on_gui_click, function(event)
+    local element = event.element
+    if element.name == "spidertron-undock-button" then
+        attempt_undock(
+            get_dock_data_from_unit_number(
+                element.tags.dock_unit_number))
+    end
+end)
