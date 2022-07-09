@@ -28,14 +28,16 @@ local dock = {
     {
         layers =
         {
-            {
-                filename = "__SpaceSpidertron__/graphics/spider-dock/dock.png",
+          {
+                -- Using "HR" for both, since it's more like halfway between
+                -- high and normal resolution
+                filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
                 priority = "low",
                 width = 113,
                 height = 120,
                 direction_count = 1,
-                shift = util.by_pixel(0, 4),
-                scale = 0.5,
+                shift = util.by_pixel(-4, -4),
+                scale = 0.6,
                 hr_version = {
                     filename = "__SpaceSpidertron__/graphics/spider-dock/hr-dock.png",
                     priority = "low",
@@ -43,9 +45,31 @@ local dock = {
                     height = 120,
                     direction_count = 1,
                     shift = util.by_pixel(-4, -4),
-                    scale = 0.6
+                    scale = 0.6,
                 }
-            }
+            },
+            {
+              -- Using "HR" for both, since it's more like halfway between
+              -- high and normal resolution
+              filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+              priority = "low",
+              width = 126,
+              height = 80,
+              direction_count = 1,
+              shift = util.by_pixel(20, 6),
+              scale = 0.6,
+              draw_as_shadow = true,
+              hr_version = {
+                  filename = "__SpaceSpidertron__/graphics/spider-dock/dock-shadow.png",
+                  priority = "low",
+                  width = 126,
+                  height = 80,
+                  direction_count = 1,
+                  shift = util.by_pixel(20, 6),
+                  scale = 0.6,
+                  draw_as_shadow = true,
+              }
+            },
         }
     },
     vehicle_impact_sound = sounds.generic_impact,
@@ -54,7 +78,7 @@ local dock = {
       sound =
       {
         {
-          filename = "__base__/sound/radar.ogg",
+          filename = "__base__/sound/accumulator-working.ogg",
           volume = 0.8
         }
       },

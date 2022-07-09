@@ -1,11 +1,144 @@
 local util = require("__core__/lualib/util")
 
-local spider = util.copy(data.raw["spider-vehicle"]["spidertron"])
-spider.name = "space-spidertron"
-spider.guns = nil
-spider.minable.result = "space-spidertron"
-spider.torso_rotation_speed = 0.02
-spider.corpse = "medium-remnants"
+local spider = {
+  type = "spider-vehicle",
+  name = "space-spidertron",
+  icon = "__base__/graphics/icons/spidertron.png",  --TODO Change
+  icon_size = 64, icon_mipmaps = 4,
+  collision_box = {{-1, -1}, {1, 1}},
+  sticker_box = {{-1.5, -1.5}, {1.5, 1.5}},
+  selection_box = {{-1, -1}, {1, 1}},
+  drawing_box = {{-3, -4}, {3, 2}},
+  mined_sound = {filename = "__core__/sound/deconstruct-large.ogg",volume = 0.8},
+  open_sound = { filename = "__base__/sound/spidertron/spidertron-door-open.ogg", volume= 0.35 },
+  close_sound = { filename = "__base__/sound/spidertron/spidertron-door-close.ogg", volume = 0.4 },
+  sound_minimum_speed = 0.1,
+  sound_scaling_ratio = 0.6,
+  allow_passengers = false,
+  working_sound =
+  {
+    sound =
+    {
+      filename = "__base__/sound/spidertron/spidertron-vox.ogg",
+      volume = 0.35
+    },
+    activate_sound =
+    {
+      filename = "__base__/sound/spidertron/spidertron-activate.ogg",
+      volume = 0.5
+    },
+    deactivate_sound =
+    {
+      filename = "__base__/sound/spidertron/spidertron-deactivate.ogg",
+      volume = 0.5
+    },
+    match_speed_to_activity = true
+  },
+  weight = 1,
+  braking_force = 1,
+  friction_force = 1,
+  flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
+  collision_mask = {},
+  minable = {result = "space-spidertron", mining_time = 1},
+  max_health = 250,
+  resistances =
+  {
+    {
+      type = "fire",
+      decrease = 15,
+      percent = 60
+    },
+    {
+      type = "physical",
+      decrease = 15,
+      percent = 60
+    },
+    {
+      type = "impact",
+      decrease = 50,
+      percent = 80
+    },
+    {
+      type = "explosion",
+      decrease = 20,
+      percent = 75
+    },
+    {
+      type = "acid",
+      decrease = 0,
+      percent = 70
+    },
+    {
+      type = "laser",
+      decrease = 0,
+      percent = 70
+    },
+    {
+      type = "electric",
+      decrease = 0,
+      percent = 70
+    }
+  },
+  minimap_representation =
+  {
+    filename = "__base__/graphics/entity/spidertron/spidertron-map.png",
+    flags = {"icon"},
+    size = {128, 128},
+    scale = 0.5
+  },
+  corpse = "medium-remnants",
+  energy_per_hit_point = 1,
+  guns = {},
+  inventory_size = 80,
+  equipment_grid = "spidertron-equipment-grid",
+  trash_inventory_size = 20,
+  height = 1.5,
+  torso_rotation_speed = 0.02,
+  chunk_exploration_radius = 3,
+  selection_priority = 51,
+  graphics_set = spidertron_torso_graphics_set(1),
+  energy_source =
+  {
+    type = "void"
+  },
+  movement_energy_consumption = "250kW",
+  automatic_weapon_cycling = true,
+  chain_shooting_cooldown_modifier = 0.5,
+  spider_engine =
+  {
+    legs =
+    {
+      { -- 1
+        leg = "space-spidertron-leg",
+        mount_position = {0, -1},
+        ground_position = {0, -1},
+        blocking_legs = {1},
+        leg_hit_the_ground_trigger = nil
+      }
+    },
+    military_target = "spidertron-military-target"
+  },
+}
+
+-- local spider = util.copy(data.raw["spider-vehicle"]["spidertron"])
+-- spider.name = "space-spidertron"
+-- spider.guns = nil
+-- spider.minable.result = "space-spidertron"
+-- spider.torso_rotation_speed = 0.02
+-- spider.corpse = "medium-remnants"
+-- spider.spider_engine = {
+--     legs =
+--     {
+--       { -- 1
+--         leg = "space-spidertron-leg",
+--         mount_position = {0, -1},
+--         ground_position = {0, -1},
+--         blocking_legs = {1},
+--         leg_hit_the_ground_trigger = nil
+--       }
+--     },
+--     military_target = "spidertron-military-target"
+-- }
 
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
 torso_bottom_layers[1].filename = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
@@ -36,14 +169,6 @@ table.insert(torso_body_layers, {
         scale = 0.5,
     }
 })
-
--- Change runtime tint to white
--- TODO Doesn't work yet
-for _, layer in pairs(torso_body_layers) do
-  if layer.apply_runtime_tint then
-    layer.tint = {r=1, g=1, b=1, a=1}
-  end
-end
 
 -- Add flame
 local flame_scale = 2
@@ -85,32 +210,43 @@ table.insert(torso_bottom_layers, 1, {
 for _, leg in pairs(spider.spider_engine.legs) do
    leg.ground_position = {0, 0}
    leg.leg_hit_the_ground_trigger = nil
---    leg.blocking_legs = {}
 end
 
-for _, leg in pairs(data.raw["spider-leg"]) do
-    leg.part_length = 0.2
-    leg.minimal_step_size = 0.1
-    leg.movement_based_position_selection_distance = 0.5
-    leg.collision_box = nil
-    leg.collision_mask = nil
-    leg.initial_movement_speed = 100
-    leg.movement_acceleration = 100
-    leg.selection_box = {{-0, -0}, {0, 0}}
+local spider_leg = {
+    type = "spider-leg",
+    name = "space-spidertron-leg",
 
-    leg.graphics_set = {}
-    -- leg.graphics_set.joint = nil
-    -- leg.graphics_set.joint_shadow = nil
-    -- leg.graphics_set.upper_part = nil
-    -- leg.graphics_set.upper_part_shadow = nil
-    -- leg.graphics_set.lower_part.top_end = nil
-    -- leg.graphics_set.lower_part.middle = nil
-end
-
+    localised_name = {"entity-name.spidertron-leg"},
+    collision_box = nil,
+    collision_mask = {},
+    selection_box = {{-0, -0}, {0, 0}},
+    icon = "__base__/graphics/icons/spidertron.png",
+    icon_size = 64, icon_mipmaps = 4,
+    walking_sound_volume_modifier = 0,
+    target_position_randomisation_distance = 0,
+    minimal_step_size = 0,
+    working_sound = nil,
+    part_length = 1000000000,
+    initial_movement_speed = 100,
+    movement_acceleration = 100,
+    max_health = 100,
+    movement_based_position_selection_distance = 3,
+    selectable_in_game = false,
+    graphics_set = create_spidertron_leg_graphics_set(0, 1)
+}
 
 -- Add item
-local spider_item = util.copy(data.raw["item-with-entity-data"]["spidertron"])
-spider_item.name = "space-spidertron"
-spider_item.place_result = "space-spidertron"
+local spider_item =   {
+    type = "item-with-entity-data",
+    name = "space-spidertron",
+    icon = "__base__/graphics/icons/spidertron.png",
+    icon_tintable = "__base__/graphics/icons/spidertron-tintable.png",
+    icon_tintable_mask = "__base__/graphics/icons/spidertron-tintable-mask.png",
+    icon_size = 64, icon_mipmaps = 4,
+    subgroup = "transport",
+    order = "b[personal-transport]-c[spidertron]-a[spider]",
+    place_result = "space-spidertron",
+    stack_size = 1
+}
 
-data:extend{spider, spider_item}
+data:extend{spider, spider_leg, spider_item}

@@ -149,3 +149,16 @@ script.on_event(defines.events.on_tick, function (event)
         end
     end
 end)
+
+function on_built(event)
+    -- If it's a space spidertron, set it to white as default
+    local entity = event.created_entity
+    if entity and entity.valid then
+        if entity.name == "space-spidertron" then
+            entity.color = {1, 1, 1, 0.5} -- White
+        end
+    end
+end
+
+script.on_event(defines.events.on_robot_built_entity, on_built)
+script.on_event(defines.events.on_built_entity, on_built)
