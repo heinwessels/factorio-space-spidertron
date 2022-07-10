@@ -24,6 +24,14 @@ function create_dock_data(dock_entity)
         serialized_spider = nil,
         docked_sprites = {},
 
+        -- A dock will only allow a dock if
+        -- it's armed for a specific spidertron
+        -- This is because the spider doesn't always
+        -- stop on the dock itself. So rather when
+        -- the waypoint is added using a remote, 
+        -- then the dock is armed.
+        armed_for = nil,
+
         -- Can be nil when something goes wrong
         dock_entity = dock_entity,
     }
@@ -91,16 +99,23 @@ end
 -- it's above a valid dock, etc.
 function attempt_dock(spider)
 
-    -- Check if there's a dock below
-    -- TODO this functionality
-    --  Maybe spider can stop closer?
-    local dock = spider.surface.find_entities_filtered{
+    -- Find the dock armed for this spider in the region
+    -- If none of the docks are armed for this spider then
+    -- ignore the command. This will likely happen when
+    --      - Dock was allocated for other spider
+    local dock = nil
+    for _, potential_dock in pairs(spider.surface.find_entities_filtered{
         name = "spidertron-dock",
         area = area_around_position(spider.position, 3, 3),
         force = spider.force
-    }[1]
+    }) do
+        local potential_dock_data = get_dock_data_from_entity(potential_dock)
+        if potential_dock_data.armed_for == spider then
+            dock = potential_dock
+            break
+        end
+    end
     if not dock then return end
-    if dock.force ~= spider.force then return end
 
     -- Check if dock is occupied
     local dock_data = get_dock_data_from_entity(dock)
@@ -142,6 +157,7 @@ function attempt_undock(dock_data)
 
     -- Success!
     dock_data.occupied = false
+    dock_data.armed_for = nil
     dock_data.serialized_spider = nil
     for _, sprite in pairs(dock_data.docked_sprites) do
         rendering.destroy(sprite)
@@ -164,15 +180,31 @@ script.on_event(defines.events.on_spider_command_completed,
     end
 )
 
-function on_built(event)
-    -- If it's a space spidertron, set it to white as default
-    local entity = event.created_entity
-    if entity and entity.valid then
-        if entity.name == "space-spidertron" then
-            entity.color = {1, 1, 1, 0.5} -- White
+-- This will remove any previous
+-- allocations to this dock
+-- It's okay if the spider never reaches the dock
+-- When a next spider tries to dock it will simply
+-- overwrite the allocation
+function dock_arm_for_spider(dock, spider)
+    if dock.force ~= spider.force then return end
+    local dock_data = get_dock_data_from_entity(dock)
+    if dock_data.occupied then return end
+    dock_data.armed_for = spider -- Overwrite
+end
+
+script.on_event(defines.events.on_player_used_spider_remote , 
+    function (event)
+        local spider = event.vehicle
+        if spider and spider.valid then
+            local dock = spider.surface.find_entity("spidertron-dock", event.position)
+            if dock then
+                -- This waypoint was placed on a valid dock!
+                -- Arm the dock so that spider is allowed to dock there
+                dock_arm_for_spider(dock, spider)
+            end
         end
     end
-end
+)
 
 function update_dock_gui_for_player(player, dock)
     -- Get dock data
@@ -202,7 +234,7 @@ function update_dock_gui_for_player(player, dock)
         -- Build starting frame
         local anchor = {
             gui=defines.relative_gui_type.accumulator_gui, 
-            position=defines.relative_gui_position.bottom
+            position=defines.relative_gui_position.right
         }
         local frame = player.gui.relative.add{
             name="spidertron-dock", 
@@ -225,8 +257,35 @@ function update_dock_gui_for_player(player, dock)
 
 end
 
+function on_built(event)
+    -- If it's a space spidertron, set it to white as default
+    local entity = event.created_entity
+    if entity and entity.valid then
+        if entity.name == "space-spidertron" then
+            entity.color = {1, 1, 1, 0.5} -- White
+        end
+    end
+end
+
 script.on_event(defines.events.on_robot_built_entity, on_built)
 script.on_event(defines.events.on_built_entity, on_built)
+script.on_event(defines.events.script_raised_built, on_built)
+
+function on_deconstructed(event)
+    -- When the dock is destroyed then attempt undock the spider
+    local entity = event.entity
+    if entity and entity.valid then
+        if entity.name == "spidertron-dock" then
+            attempt_undock(
+                get_dock_data_from_entity(entity))
+        end
+    end
+end
+
+script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
+script.on_event(defines.events.on_robot_mined_entity, on_deconstructed)
+script.on_event(defines.events.on_entity_died, on_deconstructed)
+script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 script.on_event(defines.events.on_gui_opened, function(event)
     if event.gui_type == defines.gui_type.entity 
