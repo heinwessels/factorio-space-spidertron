@@ -1,3 +1,4 @@
+local util = require("__core__/lualib/util")
 local spidertron_lib = require("script.lib.spidertron_lib")
 
 script.on_configuration_changed(function (event)
@@ -55,7 +56,7 @@ function get_dock_data_from_unit_number(dock_unit_number)
     return dock_data
 end
 
-function draw_docked_spider(dock_data, spider)
+function draw_docked_spider(dock_data, spider_name, color)
     local dock = dock_data.dock_entity
 
     -- Offset to place sprite at correct location
@@ -65,7 +66,7 @@ function draw_docked_spider(dock_data, spider)
     -- Draw shadows
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider.name.."-shadow", 
+            sprite = "docked-"..spider_name.."-shadow", 
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
@@ -75,7 +76,7 @@ function draw_docked_spider(dock_data, spider)
     -- First draw main layer
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider.name.."-main", 
+            sprite = "docked-"..spider_name.."-main", 
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
@@ -85,10 +86,10 @@ function draw_docked_spider(dock_data, spider)
     -- Then draw tinted layer
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider.name.."-tint", 
+            sprite = "docked-"..spider_name.."-tint", 
             target = dock, 
             surface = dock.surface,
-            tint = spider.color,
+            tint = color,
             target_offset = offset,
         }
     )
@@ -122,7 +123,7 @@ function attempt_dock(spider)
     if dock_data.occupied then return end
 
     -- Dock the spider!
-    draw_docked_spider(dock_data, spider)
+    draw_docked_spider(dock_data, spider.name, spider.color)
     dock_data.serialized_spider = spidertron_lib.serialise_spidertron(spider)
     spider.destroy()
     dock_data.occupied = true
@@ -206,6 +207,90 @@ script.on_event(defines.events.on_player_used_spider_remote ,
     end
 )
 
+function on_built(event)
+    -- If it's a space spidertron, set it to white as default
+    local entity = event.created_entity
+    if entity and entity.valid then
+        if entity.name == "space-spidertron" then
+            entity.color = {1, 1, 1, 0.5} -- White
+        end
+    end
+end
+
+script.on_event(defines.events.on_robot_built_entity, on_built)
+script.on_event(defines.events.on_built_entity, on_built)
+script.on_event(defines.events.script_raised_built, on_built)
+
+function on_deconstructed(event)
+    -- When the dock is destroyed then attempt undock the spider
+    local entity = event.entity
+    if entity and entity.valid then
+        if entity.name == "spidertron-dock" then
+            attempt_undock(
+                get_dock_data_from_entity(entity))
+        end
+    end
+end
+
+script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
+script.on_event(defines.events.on_robot_mined_entity, on_deconstructed)
+script.on_event(defines.events.on_entity_died, on_deconstructed)
+script.on_event(defines.events.script_raised_destroy, on_deconstructed)
+
+script.on_event(defines.events.on_gui_opened, function(event)
+    if event.gui_type == defines.gui_type.entity 
+            and event.entity.name == "spidertron-dock" then
+        update_dock_gui_for_player(
+            game.get_player(event.player_index),
+            event.entity
+        )
+    end
+end)
+
+
+-- This function is called when the spaceship changes
+-- surfaces. We need to update our global tables and redraw
+-- the sprites.
+-- Technically this can be called under different circumstances too
+-- but we will assume the spider always need to move to the
+-- new location
+script.on_event(defines.events.on_entity_cloned , function(event)
+    local source = event.source
+    local destination = event.destination
+    if source and source.valid and destination and destination.valid then
+        if source.name == "spidertron-dock" then
+            local source_data = get_dock_data_from_entity(source)
+
+            -- If there's nothing docked at the source then we
+            -- don't have to do anything
+            if not source_data.occupied then return end
+            
+            -- Move spider to new location
+            destination_data = util.copy(source_data)
+            destination_data.dock_entity = destination
+            destination_data.docked_sprites = {}
+            draw_docked_spider(
+                destination_data, 
+                destination_data.serialized_spider.name,
+                destination_data.serialized_spider.color
+            )
+            global.docks[destination.unit_number] = destination_data
+
+            -- Remove from old location
+            for _, sprite in pairs(source_data.docked_sprites) do
+                rendering.destroy(sprite)
+            end
+            global.docks[source.unit_number] = nil
+
+            -- Update all guis
+            for _, player in pairs(game.players) do
+                update_dock_gui_for_player(player, source)
+                update_dock_gui_for_player(player, destination)
+            end
+        end
+    end
+end)
+
 function update_dock_gui_for_player(player, dock)
     -- Get dock data
     local dock_data = get_dock_data_from_entity(dock)
@@ -255,31 +340,6 @@ function update_dock_gui_for_player(player, dock)
         }
     end
 
-end
-
-function on_built(event)
-    -- If it's a space spidertron, set it to white as default
-    local entity = event.created_entity
-    if entity and entity.valid then
-        if entity.name == "space-spidertron" then
-            entity.color = {1, 1, 1, 0.5} -- White
-        end
-    end
-end
-
-script.on_event(defines.events.on_robot_built_entity, on_built)
-script.on_event(defines.events.on_built_entity, on_built)
-script.on_event(defines.events.script_raised_built, on_built)
-
-function on_deconstructed(event)
-    -- When the dock is destroyed then attempt undock the spider
-    local entity = event.entity
-    if entity and entity.valid then
-        if entity.name == "spidertron-dock" then
-            attempt_undock(
-                get_dock_data_from_entity(entity))
-        end
-    end
 end
 
 script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
