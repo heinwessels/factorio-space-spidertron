@@ -1,7 +1,7 @@
 local spidertron_lib = require("script.lib.spidertron_lib")
 
 script.on_configuration_changed(function (event)
-    global.docks = global.docs or {}
+    global.docks = global.docks or {}
 end)
 
 function area_around_position(position, width, height)
@@ -52,7 +52,7 @@ function draw_docked_spider(dock_data, spider)
 
     -- Offset to place sprite at correct location
     -- This assumes we're not drawing the bottom
-    local offset = {-0.1, -0.3}
+    local offset = {-0.1, -0.35}
     
     -- Draw shadows
     table.insert(dock_data.docked_sprites, 
@@ -177,22 +177,42 @@ end
 function update_dock_gui_for_player(player, dock)
     -- Get dock data
     local dock_data = get_dock_data_from_entity(dock)
-    
-    -- Destroy whatever is there currently
-    for _, elem in pairs(player.gui.relative.children) do
-        if elem.name == "dock-frame" then elem.destroy() end
+
+    -- Destroy whatever is there currently for
+    -- any player. That's so that the player doesn't
+    -- look at an outdated GUI
+    for _, child in pairs(player.gui.relative.children) do
+        if child.name == "spidertron-dock" then
+            -- We destroy all GUIs, not only for this unit-number,
+            -- because otherwise they will open for other entities
+            child.destroy() 
+        end
     end
-    
-    if dock_data.occupied then
+
+    -- All docks have their GUIs destroyed for this player
+    -- If this dock is not occupied then we don't need
+    -- to redraw anything
+    if not dock_data.occupied then return end
+
+    -- Decide if we should rebuild. We will only build
+    -- if the player is currently looking at this dock
+    if player.opened and (player.opened == dock) then
         -- Build a new gui!
-        -- TODO Need to update this when something docks
 
         -- Build starting frame
         local anchor = {
             gui=defines.relative_gui_type.accumulator_gui, 
-            position=defines.relative_gui_position.right
+            position=defines.relative_gui_position.bottom
         }
-        local frame = player.gui.relative.add{name="dock-frame", type="frame", anchor=anchor}
+        local frame = player.gui.relative.add{
+            name="spidertron-dock", 
+            type="frame", 
+            anchor=anchor,
+
+            -- The tag associates the GUI with this
+            -- specific dock 
+            tags = {dock_unit_number = dock.unit_number}
+        }
 
         -- Add button
         frame.add{
@@ -200,9 +220,6 @@ function update_dock_gui_for_player(player, dock)
             name = "spidertron-undock-button",
             caption = {"space-spidertron-dock.undock"},
             style = "green_button",
-            tags = {
-                dock_unit_number = dock.unit_number
-            }
         }
     end
 
@@ -226,6 +243,6 @@ script.on_event(defines.events.on_gui_click, function(event)
     if element.name == "spidertron-undock-button" then
         attempt_undock(
             get_dock_data_from_unit_number(
-                element.tags.dock_unit_number))
+                element.parent.tags.dock_unit_number))
     end
 end)
