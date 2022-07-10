@@ -5,9 +5,10 @@ script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
 
     -- Fix technologies
+    local technology_unlocks_spidertron = false
     for index, force in pairs(game.forces) do
         for _, technology in pairs(force.technologies) do		
-            if not technology.enabled and technology.effects then			
+            if technology.effects then			
                 for _, effect in pairs(technology.effects) do
                     if effect.type == "unlock-recipe" then					
                         if effect.recipe == "spidertron" then
@@ -16,8 +17,8 @@ script.on_configuration_changed(function (event)
                     end
                 end
                 if technology_unlocks_spidertron then
-                    recipes["space-spidertron"].enabled = technology.researched
-                    recipes["spidertron-dock"].enabled = technology.researched
+                    force.recipes["space-spidertron"].enabled = technology.researched
+                    force.recipes["spidertron-dock"].enabled = technology.researched
                     break
                 end
             end

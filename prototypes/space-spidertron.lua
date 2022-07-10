@@ -1,9 +1,15 @@
 local util = require("__core__/lualib/util")
 
+local localised_description = nil
+if mods["space-exploration"] then
+  localised_description = {"", {"space-spidertron.description-se"}}
+end
+
 local spider = {
   type = "spider-vehicle",
   name = "space-spidertron",
-  icon = "__base__/graphics/icons/spidertron.png",  --TODO Change
+  icon = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+  localised_description = localised_description,
   icon_size = 64, icon_mipmaps = 4,
   collision_box = {{-1, -1}, {1, 1}},
   sticker_box = {{-1.5, -1.5}, {1.5, 1.5}},
@@ -219,12 +225,13 @@ local spider_leg = {
 local spider_item =   {
     type = "item-with-entity-data",
     name = "space-spidertron",
-    icon = "__base__/graphics/icons/spidertron.png",
-    icon_tintable = "__base__/graphics/icons/spidertron-tintable.png",
-    icon_tintable_mask = "__base__/graphics/icons/spidertron-tintable-mask.png",
+    localised_description = localised_description,
+    icon = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+    icon_tintable = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+    icon_tintable_mask = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon-tintable-mask.png",
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
-    order = "b[personal-transport]-c[spidertron]-a[spider]",
+    order = "b[personal-transport]-c[spidertron]-a[zspace-spider]", -- "z" to be placed after normal spider
     place_result = "space-spidertron",
     stack_size = 1
 }
