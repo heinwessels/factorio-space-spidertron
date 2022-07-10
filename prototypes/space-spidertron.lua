@@ -120,26 +120,6 @@ local spider = {
   },
 }
 
--- local spider = util.copy(data.raw["spider-vehicle"]["spidertron"])
--- spider.name = "space-spidertron"
--- spider.guns = nil
--- spider.minable.result = "space-spidertron"
--- spider.torso_rotation_speed = 0.02
--- spider.corpse = "medium-remnants"
--- spider.spider_engine = {
---     legs =
---     {
---       { -- 1
---         leg = "space-spidertron-leg",
---         mount_position = {0, -1},
---         ground_position = {0, -1},
---         blocking_legs = {1},
---         leg_hit_the_ground_trigger = nil
---       }
---     },
---     military_target = "spidertron-military-target"
--- }
-
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
 torso_bottom_layers[1].filename = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
 torso_bottom_layers[1].hr_version.filename = "__SpaceSpidertron__/graphics/space-spidertron/hr-space-spidertron-body-bottom.png"

@@ -3,21 +3,27 @@ local spidertron_lib = require("script.lib.spidertron_lib")
 
 script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
-end)
 
-function area_around_position(position, width, height)
-    height = height or width
-    return {
-        left_top = { 
-            x = position.x - width / 2, 
-            y = position.y - height / 2
-        },
-        right_bottom = {
-            x = position.x + width / 2, 
-            y = position.y + height / 2
-        }
-    }
-end
+    -- Fix technologies
+    for index, force in pairs(game.forces) do
+        for _, technology in pairs(force.technologies) do		
+            if not technology.enabled and technology.effects then			
+                for _, effect in pairs(technology.effects) do
+                    if effect.type == "unlock-recipe" then					
+                        if effect.recipe == "spidertron" then
+                            technology_unlocks_spidertron = true
+                        end
+                    end
+                end
+                if technology_unlocks_spidertron then
+                    recipes["space-spidertron"].enabled = technology.researched
+                    recipes["spidertron-dock"].enabled = technology.researched
+                    break
+                end
+            end
+        end
+    end
+end)
 
 function create_dock_data(dock_entity)
     return {
@@ -107,7 +113,8 @@ function attempt_dock(spider)
     local dock = nil
     for _, potential_dock in pairs(spider.surface.find_entities_filtered{
         name = "spidertron-dock",
-        area = area_around_position(spider.position, 3, 3),
+        position = spider.position,
+        radius = 3,
         force = spider.force
     }) do
         local potential_dock_data = get_dock_data_from_entity(potential_dock)
@@ -339,7 +346,6 @@ function update_dock_gui_for_player(player, dock)
             style = "green_button",
         }
     end
-
 end
 
 script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
