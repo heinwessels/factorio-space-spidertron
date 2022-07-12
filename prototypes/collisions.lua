@@ -23,10 +23,18 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
         table.insert(spider.localised_description, 
             {"space-exploration.placement_restriction_line", {"space-exploration.collision_mask_spaceship"}, ""})
 
-        -- Assume all spider legs are the same type. Can it even be different?
-        local leg = data.raw["spider-leg"][spider.spider_engine.legs[1].leg]
-        leg.collision_mask = leg.collision_mask or {}
-        collision_mask_util_extended.add_layer(leg.collision_mask, space_layer)
+        for _, spider_leg in pairs(spider.spider_engine.legs) do            
+            local leg_proto = data.raw["spider-leg"][spider_leg.leg]
+            leg_proto.collision_mask = leg_proto.collision_mask or {
+                -- Default layers added by vanilla at some point
+                -- It's not added it seems if we add space_layer here,
+                -- so just making sure it's there
+                "object-layer", 
+                "rail-layer",
+                "player-layer"
+            }
+            collision_mask_util_extended.add_layer(leg_proto.collision_mask, space_layer)
+        end
     end
 end
 
