@@ -133,6 +133,9 @@ function attempt_dock(spider)
     -- Dock the spider!
     draw_docked_spider(dock_data, spider.name, spider.color)
     dock_data.serialized_spider = spidertron_lib.serialise_spidertron(spider)
+    dock.create_build_effect_smoke()
+    dock.surface.play_sound{path="ss-spidertron-dock-1", position=dock.position}
+    dock.surface.play_sound{path="ss-spidertron-dock-2", position=dock.position}
     spider.destroy()
     dock_data.occupied = true
 
@@ -161,6 +164,8 @@ function attempt_undock(dock_data)
         -- TODO Handle this error nicely!
         game.print("Error! Couldn't spawn spider!")
     end
+    dock.surface.play_sound{path="ss-spidertron-undock-1", position=dock.position}
+    dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
     spidertron_lib.deserialise_spidertron(spider, serialized_spider)
     spider.torso_orientation = 0.6 -- Similar to sprite orientation
 
