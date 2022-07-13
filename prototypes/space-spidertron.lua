@@ -8,7 +8,7 @@ end
 local spider = {
   type = "spider-vehicle",
   name = "space-spidertron",
-  icon = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+  icon = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
   localised_description = localised_description,
   icon_size = 64, icon_mipmaps = 4,
   collision_box = {{-1, -1}, {1, 1}},
@@ -127,17 +127,17 @@ local spider = {
 }
 
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
-torso_bottom_layers[1].filename = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
-torso_bottom_layers[1].hr_version.filename = "__SpaceSpidertron__/graphics/space-spidertron/hr-space-spidertron-body-bottom.png"
+torso_bottom_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
+torso_bottom_layers[1].hr_version.filename = "__space-spidertron__/graphics/space-spidertron/hr-space-spidertron-body-bottom.png"
 
 local torso_body_layers = spider.graphics_set.animation.layers
-torso_body_layers[1].filename = "__SpaceSpidertron__/graphics/space-spidertron/spidertron-body.png"
-torso_body_layers[1].hr_version.filename = "__SpaceSpidertron__/graphics/space-spidertron/hr-space-spidertron-body.png"
+torso_body_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/spidertron-body.png"
+torso_body_layers[1].hr_version.filename = "__space-spidertron__/graphics/space-spidertron/hr-space-spidertron-body.png"
 
 -- Recolour eyes 
 -- TODO Add highlight
 table.insert(torso_body_layers, {
-    filename = "__SpaceSpidertron__/graphics/space-spidertron/spidertron-eyes-all-mask.png",
+    filename = "__space-spidertron__/graphics/space-spidertron/spidertron-eyes-all-mask.png",
     width = 66,
     height = 70,
     line_length = 8,
@@ -145,7 +145,7 @@ table.insert(torso_body_layers, {
     tint = util.color("0080ff"),
     shift = util.by_pixel(0, -19),
     hr_version = {
-        filename = "__SpaceSpidertron__/graphics/space-spidertron/hr-spidertron-eyes-all-mask.png",
+        filename = "__space-spidertron__/graphics/space-spidertron/hr-spidertron-eyes-all-mask.png",
         width = 132,
         height = 138,
         line_length = 8,
@@ -226,9 +226,9 @@ local spider_item =   {
     type = "item-with-entity-data",
     name = "space-spidertron",
     localised_description = localised_description,
-    icon = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
-    icon_tintable = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon.png",
-    icon_tintable_mask = "__SpaceSpidertron__/graphics/space-spidertron/space-spidertron-icon-tintable-mask.png",
+    icon = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+    icon_tintable = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
+    icon_tintable_mask = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon-tintable-mask.png",
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
     order = "b[personal-transport]-c[spidertron]-a[zspace-spider]", -- "z" to be placed after normal spider

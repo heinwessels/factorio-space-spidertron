@@ -15,7 +15,7 @@ local dock = {
     -- Type radar so that we have an animation to work with
     type = "accumulator",
     name = "spidertron-dock",
-    icon = "__SpaceSpidertron__/graphics/spidertron-dock/dock-icon.png",
+    icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
     localised_description = localised_description,
     minable = {mining_time = 0.1, result = "spidertron-dock"},
     icon_size = 64, icon_mipmaps = 4,
@@ -44,7 +44,7 @@ local dock = {
         {
               -- Using "HR" for both, since it's more like halfway between
               -- high and normal resolution
-              filename = "__SpaceSpidertron__/graphics/spidertron-dock/hr-dock.png",
+              filename = "__space-spidertron__/graphics/spidertron-dock/hr-dock.png",
               priority = "low",
               width = 113,
               height = 120,
@@ -52,7 +52,7 @@ local dock = {
               shift = util.by_pixel(-4, -4),
               scale = 0.6,
               hr_version = {
-                  filename = "__SpaceSpidertron__/graphics/spidertron-dock/hr-dock.png",
+                  filename = "__space-spidertron__/graphics/spidertron-dock/hr-dock.png",
                   priority = "low",
                   width = 113,
                   height = 120,
@@ -64,7 +64,7 @@ local dock = {
           {
             -- Using "HR" for both, since it's more like halfway between
             -- high and normal resolution
-            filename = "__SpaceSpidertron__/graphics/spidertron-dock/dock-shadow.png",
+            filename = "__space-spidertron__/graphics/spidertron-dock/dock-shadow.png",
             priority = "low",
             width = 126,
             height = 80,
@@ -73,7 +73,7 @@ local dock = {
             scale = 0.6,
             draw_as_shadow = true,
             hr_version = {
-                filename = "__SpaceSpidertron__/graphics/spidertron-dock/dock-shadow.png",
+                filename = "__space-spidertron__/graphics/spidertron-dock/dock-shadow.png",
                 priority = "low",
                 width = 126,
                 height = 80,
@@ -123,7 +123,7 @@ local dock = {
 local dock_item = {
     type = "item",
     name = "spidertron-dock",
-    icon = "__SpaceSpidertron__/graphics/spidertron-dock/dock-icon.png",
+    icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
     localised_description = localised_description,
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
