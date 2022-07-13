@@ -18,5 +18,10 @@ data:extend({
         name = "ss-spidertron-undock-2",
         type = "sound",
         filename = "__base__/sound/cargo-wagon-open.ogg",
-    }
+    },
+    {
+        name = "ss-no-no",
+        type = "sound",
+        filename = "__core__/sound/cannot-build.ogg",
+    },
 })

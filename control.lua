@@ -145,12 +145,46 @@ function attempt_dock(spider)
     end
 end
 
-function attempt_undock(dock_data)
+function attempt_undock(player, dock_data, force)
     if not dock_data.occupied then return end
     if not dock_data.serialized_spider then return end
     local serialized_spider = dock_data.serialized_spider
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
+
+    -- First check if there's space to build the spider
+    -- The spider will try to fit it's feet between obstacles
+    -- However, when the dock is mined then we will force the
+    -- spider to be created so that the player doesn't lose it
+    -- Which might place the spider in an odd position, but oh well.
+    if force ~= true and not dock.surface.can_place_entity{
+        name = serialized_spider.name,
+        position = dock.position,
+        force = dock.force,
+
+        -- Needs to be manual, don't know why
+        build_check_type = defines.build_check_type.manual,
+    } then
+        -- It's not possible to undock as there is a collision
+        -- Play a sound, and create some flying text
+        -- TODO A future GUI should display the error message.
+        -- because the flying text is obscure
+        dock.surface.play_sound{path="ss-no-no", position=dock.position}
+        if player then
+            -- We can only play a sound if there's an player
+            -- and there might be a case where the player
+            -- isn't specified
+            player.create_local_flying_text{
+                text = {"space-spidertron-dock.no-room"},
+                position = {
+                    dock.position.x,
+                    dock.position.y,
+                },
+                color = {r=1,g=1,b=1,a=1},
+            }
+        end
+        return
+    end
 
     -- Create a empty spider and apply the
     -- serialized spider onto that spider
@@ -162,7 +196,7 @@ function attempt_undock(dock_data)
     }
     if not spider then
         -- TODO Handle this error nicely!
-        game.print("Error! Couldn't spawn spider!")
+        error("Error! Couldn't spawn spider!\n"..serpent.block(dock_data))
     end
     dock.surface.play_sound{path="ss-spidertron-undock-1", position=dock.position}
     dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
@@ -237,10 +271,12 @@ script.on_event(defines.events.script_raised_built, on_built)
 function on_deconstructed(event)
     -- When the dock is destroyed then attempt undock the spider
     local entity = event.entity
+    local player = nil
+    if event.player_index then player = game.players[event.player_index] end
     if entity and entity.valid then
         if entity.name == "spidertron-dock" then
-            attempt_undock(
-                get_dock_data_from_entity(entity))
+            attempt_undock(player,
+                get_dock_data_from_entity(entity), true)
         end
     end
 end
@@ -372,7 +408,7 @@ end)
 script.on_event(defines.events.on_gui_click, function(event)
     local element = event.element
     if element.name == "spidertron-undock-button" then
-        attempt_undock(
+        attempt_undock(game.players[event.player_index],
             get_dock_data_from_unit_number(
                 element.parent.tags.dock_unit_number))
     end
