@@ -1,10 +1,14 @@
 
-## Future possible additions
+# [Space Spidertron](https://mods.factorio.com/mod/space-spidertron)
+
+
+# Future possible additions
 - A better dock GUI, with more information and better error messages.
+- If appropriate mod is detected, use charged batteries as fuel for space spidertrons.
 - If one day supported by Space-Exploration, allow regular spidertrons on spaceships but not in space.
 - Possibly allow access to the docked spidertron's inventory through the dock itself.
 
-## Credits
+# Credits
 - [Kirazy](https://mods.factorio.com/user/Kirazy) for the Spidertron eye mask
 - [Xorimuth](https://mods.factorio.com/user/Xorimuth) for the super useful `spidertron_lib`.
 - [Klonan](https://mods.factorio.com/mod/Companion_Drones) for how to make the spidertron fly.

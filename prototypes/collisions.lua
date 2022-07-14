@@ -13,7 +13,7 @@ local space_layer =
         collision_mask_util_extended.get_make_named_collision_mask("space-tile")
 
 for _, spider in pairs(data.raw["spider-vehicle"]) do
-    if spider.name ~= "space-spidertron" and spider.name ~= "se-burbulator" then 
+    if spider.name ~= "ss-space-spidertron" and spider.name ~= "se-burbulator" then 
         spider.collision_mask = spider.collision_mask or {}
         collision_mask_util_extended.add_layer(spider.collision_mask, space_layer)
         

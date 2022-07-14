@@ -7,7 +7,7 @@ end
 
 local spider = {
   type = "spider-vehicle",
-  name = "space-spidertron",
+  name = "ss-space-spidertron",
   icon = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
   localised_description = localised_description,
   icon_size = 64, icon_mipmaps = 4,
@@ -45,7 +45,7 @@ local spider = {
   friction_force = 1,
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
   collision_mask = {},
-  minable = {result = "space-spidertron", mining_time = 1},
+  minable = {result = "ss-space-spidertron", mining_time = 1},
   max_health = 250,
   resistances =
   {
@@ -224,7 +224,7 @@ local spider_leg = {
 -- Add item
 local spider_item =   {
     type = "item-with-entity-data",
-    name = "space-spidertron",
+    name = "ss-space-spidertron",
     localised_description = localised_description,
     icon = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
     icon_tintable = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon.png",
@@ -232,7 +232,7 @@ local spider_item =   {
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
     order = "b[personal-transport]-c[spidertron]-a[zspace-spider]", -- "z" to be placed after normal spider
-    place_result = "space-spidertron",
+    place_result = "ss-space-spidertron",
     stack_size = 1
 }
 

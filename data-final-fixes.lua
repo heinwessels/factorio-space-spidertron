@@ -4,16 +4,16 @@ require("prototypes.spidertron-sprites")
 local spider_recipe = util.merge{
     data.raw["recipe"]["spidertron"],
     {
-        name = "space-spidertron",
-        result = "space-spidertron",
+        name = "ss-space-spidertron",
+        result = "ss-space-spidertron",
     }
 }
 
 local dock_recipe = util.merge{
     data.raw["recipe"]["spidertron"],
     {
-        name = "spidertron-dock",
-        result = "spidertron-dock",
+        name = "ss-spidertron-dock",
+        result = "ss-spidertron-dock",
     }
 }
 
@@ -42,11 +42,11 @@ for _, technology in pairs(data.raw.technology) do
         if technology_unlocks_spidertron then
             table.insert(technology.effects, {
                 type = "unlock-recipe",
-                recipe = "space-spidertron"
+                recipe = "ss-space-spidertron"
             })
             table.insert(technology.effects, {
                 type = "unlock-recipe",
-                recipe = "spidertron-dock"
+                recipe = "ss-spidertron-dock"
             })
             break
         end

@@ -14,10 +14,10 @@ end
 local dock = {
     -- Type radar so that we have an animation to work with
     type = "accumulator",
-    name = "spidertron-dock",
+    name = "ss-spidertron-dock",
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
     localised_description = localised_description,
-    minable = {mining_time = 0.1, result = "spidertron-dock"},
+    minable = {mining_time = 0.1, result = "ss-spidertron-dock"},
     icon_size = 64, icon_mipmaps = 4,
     flags = {"placeable-player", "player-creation"},
     max_health = 250,
@@ -122,13 +122,13 @@ local dock = {
 
 local dock_item = {
     type = "item",
-    name = "spidertron-dock",
+    name = "ss-spidertron-dock",
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
     localised_description = localised_description,
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
     order = "b[personal-transport]-c[spidertron]-d[spidertron-dock]",
-    place_result = "spidertron-dock",
+    place_result = "ss-spidertron-dock",
     stack_size = 20
 }
 

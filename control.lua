@@ -17,8 +17,8 @@ script.on_configuration_changed(function (event)
                     end
                 end
                 if technology_unlocks_spidertron then
-                    force.recipes["space-spidertron"].enabled = technology.researched
-                    force.recipes["spidertron-dock"].enabled = technology.researched
+                    force.recipes["ss-space-spidertron"].enabled = technology.researched
+                    force.recipes["ss-spidertron-dock"].enabled = technology.researched
                     break
                 end
             end
@@ -162,7 +162,7 @@ function attempt_dock(spider)
     --      - Dock was allocated for other spider
     local dock = nil
     for _, potential_dock in pairs(spider.surface.find_entities_filtered{
-        name = "spidertron-dock",
+        name = "ss-spidertron-dock",
         position = spider.position,
         radius = 3,
         force = spider.force
@@ -298,7 +298,7 @@ script.on_event(defines.events.on_player_used_spider_remote ,
     function (event)
         local spider = event.vehicle
         if spider and spider.valid then
-            local dock = spider.surface.find_entity("spidertron-dock", event.position)
+            local dock = spider.surface.find_entity("ss-spidertron-dock", event.position)
             if dock then
                 -- This waypoint was placed on a valid dock!
                 -- Arm the dock so that spider is allowed to dock there
@@ -312,7 +312,7 @@ function on_built(event)
     -- If it's a space spidertron, set it to white as default
     local entity = event.created_entity
     if entity and entity.valid then
-        if entity.name == "space-spidertron" then
+        if entity.name == "ss-space-spidertron" then
             entity.color = {1, 1, 1, 0.5} -- White
         end
     end
@@ -328,7 +328,7 @@ function on_deconstructed(event)
     local player = nil
     if event.player_index then player = game.players[event.player_index] end
     if entity and entity.valid then
-        if entity.name == "spidertron-dock" then
+        if entity.name == "ss-spidertron-dock" then
             attempt_undock(player,
                 get_dock_data_from_entity(entity), true)
         end
@@ -342,7 +342,7 @@ script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 script.on_event(defines.events.on_gui_opened, function(event)
     if event.gui_type == defines.gui_type.entity 
-            and event.entity.name == "spidertron-dock" then
+            and event.entity.name == "ss-spidertron-dock" then
         update_dock_gui_for_player(
             game.get_player(event.player_index),
             event.entity
@@ -361,7 +361,7 @@ script.on_event(defines.events.on_entity_cloned , function(event)
     local source = event.source
     local destination = event.destination
     if source and source.valid and destination and destination.valid then
-        if source.name == "spidertron-dock" then
+        if source.name == "ss-spidertron-dock" then
             local source_data = get_dock_data_from_entity(source)
 
             -- If there's nothing docked at the source then we
@@ -402,7 +402,7 @@ function update_dock_gui_for_player(player, dock)
     -- any player. That's so that the player doesn't
     -- look at an outdated GUI
     for _, child in pairs(player.gui.relative.children) do
-        if child.name == "spidertron-dock" then
+        if child.name == "ss-spidertron-dock" then
             -- We destroy all GUIs, not only for this unit-number,
             -- because otherwise they will open for other entities
             child.destroy() 
@@ -425,7 +425,7 @@ function update_dock_gui_for_player(player, dock)
             position=defines.relative_gui_position.right
         }
         local frame = player.gui.relative.add{
-            name="spidertron-dock", 
+            name="ss-spidertron-dock", 
             type="frame", 
             anchor=anchor,
 
@@ -451,7 +451,7 @@ script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 script.on_event(defines.events.on_gui_opened, function(event)
     if event.gui_type == defines.gui_type.entity 
-            and event.entity.name == "spidertron-dock" then
+            and event.entity.name == "ss-spidertron-dock" then
         update_dock_gui_for_player(
             game.get_player(event.player_index),
             event.entity
