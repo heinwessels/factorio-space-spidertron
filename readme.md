@@ -1,7 +1,7 @@
 
 # [Space Spidertron](https://mods.factorio.com/mod/space-spidertron)
 
-
+![](https://raw.githubusercontent.com/heinwessels/factorio-space-spidertron/main/mod-page/infographic.png)
 
 A flying spidertron capable of traversing in the zero-gravity environment of space. These spidertrons have the same properties as normal spidertrons except it hovers using a rocket engine, and has no guns (yet). Therefore they are perfect builders for your space bases where there might not be scaffolding everywhere to walk. Now you have a friend you can leave behind in the remote astroid field that will happily help you fix your inevitable mistakes.
 

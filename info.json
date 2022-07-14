@@ -8,5 +8,5 @@
 		"base >= 1.1.0",
 		"space-exploration"
 	],
-	"description": "A flying spidertron capable of traversing in the zero-gravity environment of space. It also includes a spidertron dock for safe travel on spaceships. Designed to be used with Space Exploration."
+	"description": "A flying spidertron capable of traversing in the zero-gravity environment of space. It also includes a dock for safe spidertron travel on spaceships. Designed to be used with Space Exploration."
 }
