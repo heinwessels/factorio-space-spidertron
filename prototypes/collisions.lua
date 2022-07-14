@@ -4,6 +4,8 @@
 
 if not mods["space-exploration"] then return end
 
+if settings.startup["space-spidertron-allow-other-spiders-in-space"].value then return end
+
 -- Let's use SE's nice tool
 local collision_mask_util_extended = require("lib.collision-mask-util-extended")
 

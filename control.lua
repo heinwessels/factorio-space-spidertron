@@ -102,11 +102,60 @@ function draw_docked_spider(dock_data, spider_name, color)
     )
 end
 
+-- An function to call when an dock action
+-- was not allowed. It will play the "no-no"
+-- sound and create some flying text
+function dock_error(player, dock, text)
+    -- TODO A future GUI should display the error message.
+    -- because the flying text is obscure
+    dock.surface.play_sound{path="ss-no-no", position=dock.position}
+    if player then
+        -- We can only play a sound if there's an player
+        -- and there might be a case where the player
+        -- isn't specified
+        player.create_local_flying_text{
+            text = text,
+            position = {
+                dock.position.x,
+                dock.position.y,
+            },
+            color = {r=1,g=1,b=1,a=1},
+        }
+    end
+end
+
+-- Sometimes a dock will not support a specific
+-- spider type. Currently this only happens
+-- when a normal spider tries to dock to a dock
+-- that's placed on a spaceship tile. This is required
+-- because if your spaceship is small enough the spider
+-- can reach the dock without stepping on restricted
+-- spaceship tiles
+-- Will return the text to display if there is no support
+function dock_does_not_support_spider(dock, spider_name)
+    -- Only do this check though if player did turn
+    -- off restricting regular spiders to space
+    if settings.startup[
+        "space-spidertron-allow-other-spiders-in-space"].value then
+            return end
+        
+    -- Space spidertron is always allowed
+    if spider_name == "ss-space-spidertron" then return end
+
+    -- Check if the dock is on a spaceship tile
+    -- This is not a full-proof check, as we check only one tile under the dock
+    -- and there are 4 that can potentially be a spaceship tile. However, in that
+    -- case the ship can't launch due to it's mechanics. And if the player really
+    -- wants to he can hack the system, so this check is good enough.
+    if dock.surface.get_tile(dock.position).name == "se-spaceship-floor" then
+        return {"space-spidertron-dock.spider-not-supported-on-tile"}
+    end
+end
+
 -- This function will attempt the dock
 -- of a spider. It will only work if
 -- it's above a valid dock, etc.
 function attempt_dock(spider)
-
     -- Find the dock armed for this spider in the region
     -- If none of the docks are armed for this spider then
     -- ignore the command. This will likely happen when
@@ -130,6 +179,15 @@ function attempt_dock(spider)
     local dock_data = get_dock_data_from_entity(dock)
     if dock_data.occupied then return end
 
+    -- Check if this spider is allowed to dock here
+    local error_msg = dock_does_not_support_spider(dock, spider.name)
+    if error_msg then
+        -- TODO display error message. Currently we cannot 
+        -- because we don't know which player issued the command
+        -- So lets fail silently
+        return
+    end
+
     -- Dock the spider!
     draw_docked_spider(dock_data, spider.name, spider.color)
     dock_data.serialized_spider = spidertron_lib.serialise_spidertron(spider)
@@ -152,38 +210,34 @@ function attempt_undock(player, dock_data, force)
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
 
-    -- First check if there's space to build the spider
-    -- The spider will try to fit it's feet between obstacles
-    -- However, when the dock is mined then we will force the
-    -- spider to be created so that the player doesn't lose it
-    -- Which might place the spider in an odd position, but oh well.
-    if force ~= true and not dock.surface.can_place_entity{
-        name = serialized_spider.name,
-        position = dock.position,
-        force = dock.force,
+    -- When the dock is mined then we will force the
+    -- spider to be created so that the player doesn't lose it,
+    -- whereas normally we would do some collision checks.
+    -- Which might place the spider in an odd position, but oh well
+    if force ~= true then
 
-        -- Needs to be manual, don't know why
-        build_check_type = defines.build_check_type.manual,
-    } then
-        -- It's not possible to undock as there is a collision
-        -- Play a sound, and create some flying text
-        -- TODO A future GUI should display the error message.
-        -- because the flying text is obscure
-        dock.surface.play_sound{path="ss-no-no", position=dock.position}
-        if player then
-            -- We can only play a sound if there's an player
-            -- and there might be a case where the player
-            -- isn't specified
-            player.create_local_flying_text{
-                text = {"space-spidertron-dock.no-room"},
-                position = {
-                    dock.position.x,
-                    dock.position.y,
-                },
-                color = {r=1,g=1,b=1,a=1},
-            }
+        -- Check if this spider is allowed to dock here
+        local error_msg = dock_does_not_support_spider(dock, serialized_spider.name)
+        if error_msg then
+            dock_error(player, dock, error_msg)
+            return
         end
-        return
+
+        -- First check if there's space to build the spider
+        -- The spider will try to fit it's feet between obstacles.
+        if not dock.surface.can_place_entity{
+            name = serialized_spider.name,
+            position = dock.position,
+            force = dock.force,
+
+            -- Needs to be manual, don't know why
+            build_check_type = defines.build_check_type.manual,
+        } then
+            -- It's not possible to undock as there is a collision
+            -- Play a sound, and create some flying text
+            dock_error(player, dock, {"space-spidertron-dock.no-room"})
+            return
+        end
     end
 
     -- Create a empty spider and apply the
