@@ -87,7 +87,7 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
 
         -- Add the sprites
         data:extend{
-            {    -- TODO Add shadows which is in a different layer
+            {
                 type = "sprite",
                 name = "docked-"..spider.name.."-shadow",
                 layers = shadow_layers,

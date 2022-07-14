@@ -1,12 +1,12 @@
 {
 	"name": "space-spidertron",
 	"version": "0.1.0",
-	"title": "Space Spidertron - Space Exploration",
+	"title": "Space Spidertron",
 	"author": "stringweasel",	
 	"factorio_version": "1.1",
 	"dependencies": [
 		"base >= 1.1.0",
 		"space-exploration"
 	],
-	"description": "A flying spider-vehicle capable of traversing zero-gravity that's designed to be used with Space Exploration. Includes a spidertron dock for sp"
+	"description": "A flying spidertron capable of traversing in the zero-gravity environment of space. It also includes a spidertron dock for safe travel on spaceships. Designed to be used with Space Exploration."
 }

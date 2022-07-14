@@ -49,7 +49,7 @@ local dock = {
               width = 113,
               height = 120,
               direction_count = 1,
-              shift = util.by_pixel(-4, -4),
+              shift = util.by_pixel(0, -4),
               scale = 0.6,
               hr_version = {
                   filename = "__space-spidertron__/graphics/spidertron-dock/hr-dock.png",
@@ -57,7 +57,7 @@ local dock = {
                   width = 113,
                   height = 120,
                   direction_count = 1,
-                  shift = util.by_pixel(-4, -4),
+                  shift = util.by_pixel(0, -4),
                   scale = 0.6,
               }
           },

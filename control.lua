@@ -68,7 +68,7 @@ function draw_docked_spider(dock_data, spider_name, color)
 
     -- Offset to place sprite at correct location
     -- This assumes we're not drawing the bottom
-    local offset = {-0.1, -0.35}
+    local offset = {0, -0.35}
     
     -- Draw shadows
     table.insert(dock_data.docked_sprites, 
