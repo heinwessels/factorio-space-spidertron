@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 15. 07. 2022
+  Changes:
+    - Dependency on Space Exploration is now optional.
   Bugfixes:
     - Fix crash when opening GUI without entity. (Thanks LCStark!)
 ---------------------------------------------------------------------------------------------------
