@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+Date: 15. 07. 2022
+  Changes:
+    - Dock now have a more sensible recipe.
+  Bugfixes:
+    - Fixed incompatibility with other mods which define recipes differently, like Spidertron Tiers. (Thanks runtimethecat!)
+---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 15. 07. 2022
   Changes:

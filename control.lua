@@ -42,6 +42,10 @@ function create_dock_data(dock_entity)
 
         -- Can be nil when something goes wrong
         dock_entity = dock_entity,
+
+        -- Keep this in here so that it's easy to
+        -- find this entry in global
+        unit_number = dock_entity.unit_number
     }
 end
 
@@ -209,6 +213,15 @@ function attempt_undock(player, dock_data, force)
     local serialized_spider = dock_data.serialized_spider
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
+    
+    -- Some sanity check. If this happens, then something bad happens.
+    -- Just quitly sweep it under the rug
+    if not dock.valid then 
+        -- Delete the entry, because it's likely this
+        -- dock was deleted
+        global.docks[dock_data.unit_number] = nil
+        return
+    end
 
     -- When the dock is mined then we will force the
     -- spider to be created so that the player doesn't lose it,

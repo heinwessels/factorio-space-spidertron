@@ -132,4 +132,18 @@ local dock_item = {
     stack_size = 20
 }
 
-data:extend{dock, dock_item}
+local dock_recipe = {
+    type = "recipe",
+    name = "ss-spidertron-dock",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+        {"steel-plate", 20},
+        {"low-density-structure", 10},
+        {"engine-unit", 10},        
+        {"rocket-control-unit", 5},
+    },
+    result = "ss-spidertron-dock"
+}
+
+data:extend{dock, dock_item, dock_recipe}
