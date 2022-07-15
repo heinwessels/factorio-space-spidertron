@@ -450,8 +450,10 @@ script.on_event(defines.events.on_entity_died, on_deconstructed)
 script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 script.on_event(defines.events.on_gui_opened, function(event)
+    local entity = event.entity
+    if not entity then return end
     if event.gui_type == defines.gui_type.entity 
-            and event.entity.name == "ss-spidertron-dock" then
+            and entity.name == "ss-spidertron-dock" then
         update_dock_gui_for_player(
             game.get_player(event.player_index),
             event.entity
