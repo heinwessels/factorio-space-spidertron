@@ -17,11 +17,26 @@ local dock_recipe = util.merge{
     }
 }
 
+-- Remove the gun
+for index, ingredient in pairs(spider_recipe.ingredients) do
+    if ingredient then
+        if ingredient[1] == "rocket-launcher" then
+            table.remove(spider_recipe.ingredients, index)
+            break -- This loop is now broken, and we got what we're looking for
+        end
+    end
+end
+
 if mods["space-exploration"] then
     table.insert(
         spider_recipe.ingredients,
-        -- The fish needs to survice in space somehow
+        -- The life needs to survice in space somehow
         {"se-lifesupport-canister", 5}
+    )
+else
+    table.insert(
+        spider_recipe.ingredients,
+        {"rocket-fuel", 10}
     )
 end
 

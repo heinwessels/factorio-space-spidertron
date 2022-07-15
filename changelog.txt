@@ -2,6 +2,8 @@
 Version: 0.1.1
 Date: 15. 07. 2022
   Changes:
+    - Removed Rocket Launcher as Space Spidertron ingredient.
+    - Added Rocket Fuel as ingredient to Sapce Spidertron when SE is not installed.
     - Dependency on Space Exploration is now optional.
   Bugfixes:
     - Fix crash when opening GUI without entity. (Thanks LCStark!)
