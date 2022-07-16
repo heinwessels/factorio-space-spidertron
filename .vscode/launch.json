@@ -8,13 +8,8 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug",
-        },
-        {
-            "type": "factoriomod",
-            "request": "launch",
-            "name": "Factorio Mod Debug",
             "factorioPath": "C:/Users/heinw/Documents/Factorio/Versions/Factorio_1.1.59/bin/x64/factorio.exe",
-            "hookData": true,
+            // "hookData": true,
         },
         {
             "type": "factoriomod",
