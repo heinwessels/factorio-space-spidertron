@@ -3,6 +3,10 @@ Version: 0.1.3
 Date: ??.??.????
   Changes:
     - Decreased dock collisionbox to allow walking between them.
+    - Raise build event event when undocking spider.
+  Bugfixes:
+    - Fix always defaulting space spidertron to white, except when spawned from a rocket launch.
+
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 15. 07. 2022
