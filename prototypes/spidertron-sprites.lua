@@ -19,91 +19,133 @@
 
 local util = require("__core__/lualib/util")
 
-for _, spider in pairs(data.raw["spider-vehicle"]) do
-    if spider.name ~= "se-burbulator" then
-        local main_layers = {}
-        local shadow_layers = {}
-        local tint_layers = {}
 
-        -- Get the spider graphics. We don't draw the legs
-        local torso_bottom_layers = util.copy(spider.graphics_set.base_animation.layers)
-        local torso_body_layers = util.copy(spider.graphics_set.animation.layers)
-        -- TODO What if shadow is also layers?
-        local torso_body_shadow = util.copy(spider.graphics_set.shadow_animation)
+-- Hardcoded blacklist. Can make this more dynamic in the future
+local SPIDER_BLACK_LIST = {
+    ["se-burbulator"] = true,
+}
 
-        -- Sanitize and add the bottom layers
-        for index, layer in pairs(torso_bottom_layers) do
-            -- Actually, we don't want to draw the bottom.
-            -- The spider sits much more snugly if we don't
-            -- draw the bottom. Changing this requires 
-            -- changing where the sprite is drawn
-            break
+-- This function will dictate if a spider is
+-- dockable or not. If we can build a sprite
+-- for it to show during docking, then it's
+-- dockable. If we find anything that we don't
+-- expect, then we abort the spider, and it won't
+-- be dockable. This will be checked during runtime
+-- by checking if a sprite exists for the spider
+-- attempting to dock
+function attempt_build_sprite(spider)
+    local main_layers = {}
+    local shadow_layers = {}
+    local tint_layers = {}
 
-            -- Only use non-flame layers
-            -- Only looking at the bottom because that's likely where they will exist
-            if not layer.filename:find("flame") then
-                if layer.apply_runtime_tint then
-                    table.insert(tint_layers, layer)
-                else
-                    table.insert(main_layers, layer)
-                end
+    -- Try to build the sprite. We will only care about
+    --  Base: The stationary frame at the bottom
+    --      Here will will remove any potential layers with the
+    --      word "flame" in the file name. Flames will burn the dock
+    --  Animation: The part that turns
+    --  Shadow: It's shadow
+    --      Only here will we not expect layers
+    --      What if it is though? FAIL!
 
-            end
-        end
+    -- Using these sprites we will build our own three sprites
+    -- that we layer during runtime. This will be:
+    --      Main: The body, essentially a single rotation of the animation
+    --      Tint: Only the tinted layers to give the docked spider the correct colours
+    --      Shadow: Yup...
 
-        -- Sanitize the and add the body layer. 
-        for index, layer in pairs(torso_body_layers) do
+    if not spider.minable then return end -- Might help out filter composite spider things
+    
+    if not spider.graphics_set then return end
+    if not spider.graphics_set.base_animation then return end
+    if not spider.graphics_set.animation then return end
+    if not spider.graphics_set.shadow_animation then return end
 
-            -- The body layer contains animations for all rotations,
-            -- So change {x,y} to a nice looking one
-            -- TODO This can be smarter
-            layer.x = layer.width * 4
-            layer.y = layer.height * 4
-            layer.hr_version.x = layer.hr_version.width * 4
-            layer.hr_version.y = layer.hr_version.height * 4
-            
+    local torso_bottom_layers = util.copy(spider.graphics_set.base_animation.layers)
+    local torso_body_layers = util.copy(spider.graphics_set.animation.layers)
+    local torso_body_shadow = util.copy(spider.graphics_set.shadow_animation)
+
+    if not torso_bottom_layers or not torso_body_layers or not torso_body_shadow then return end
+
+    -- Sanitize and add the bottom layers
+    for index, layer in pairs(torso_bottom_layers) do
+        -- Actually, we don't want to draw the bottom.
+        -- The spider sits much more snugly if we don't
+        -- draw the bottom. Changing this requires 
+        -- changing where the sprite is drawn
+        break
+
+        -- Only use non-flame layers
+        -- Only looking at the bottom because that's likely where they will exist
+        if not layer.filename:find("flame") then
             if layer.apply_runtime_tint then
                 table.insert(tint_layers, layer)
             else
-            table.insert(main_layers, layer)
+                table.insert(main_layers, layer)
             end
         end
+    end
 
-        -- Sanitize the and add the shadow layers
-        -- NB: We're not building the "bottom" shadows,
-        -- because the bottom is not currently drawn
-        for index, layer in pairs({torso_body_shadow}) do
+    -- Sanitize the and add the body layer. 
+    for index, layer in pairs(torso_body_layers) do
 
-            -- The body layer contains animations for all rotations,
-            -- So change {x,y} to a nice looking one
-            -- TODO This can be smarter
-            layer.x = layer.width * 4
-            layer.y = layer.height * 4
-            layer.hr_version.x = layer.hr_version.width * 4
-            layer.hr_version.y = layer.hr_version.height * 4
-            
-            table.insert(shadow_layers, layer)
+        -- The body layer contains animations for all rotations,
+        -- So change {x,y} to a nice looking one
+        -- TODO This can be smarter
+        layer.x = layer.width * 4
+        layer.y = layer.height * 4
+        layer.hr_version.x = layer.hr_version.width * 4
+        layer.hr_version.y = layer.hr_version.height * 4
+        
+        if layer.apply_runtime_tint then
+            table.insert(tint_layers, layer)
+        else
+        table.insert(main_layers, layer)
         end
+    end
 
-        -- Add the sprites
-        data:extend{
-            {
-                type = "sprite",
-                name = "docked-"..spider.name.."-shadow",
-                layers = shadow_layers,
-                flags = {"shadow"},
-                draw_as_shadow = true,
-            },
-            {
-                type = "sprite",
-                name = "docked-"..spider.name.."-main",
-                layers = main_layers,
-            },
-            {
-                type = "sprite",
-                name = "docked-"..spider.name.."-tint",
-                layers = tint_layers,
-            },
-        }
+    -- Sanitize the and add the shadow layers
+    -- NB: We're not building the "bottom" shadows,
+    -- because the bottom is not currently drawn
+    for index, layer in pairs({torso_body_shadow}) do
+
+        -- The body layer contains animations for all rotations,
+        -- So change {x,y} to a nice looking one
+        -- TODO This can be smarter
+        layer.x = layer.width * 4
+        layer.y = layer.height * 4
+        layer.hr_version.x = layer.hr_version.width * 4
+        layer.hr_version.y = layer.hr_version.height * 4
+        
+        table.insert(shadow_layers, layer)
+    end
+
+    if not next(shadow_layers) or not next(main_layers) or not next(tint_layers) then return end
+
+    -- Add the sprites
+    data:extend{
+        {
+            type = "sprite",
+            name = "ss-docked-"..spider.name.."-shadow",
+            layers = shadow_layers,
+            flags = {"shadow"},
+            draw_as_shadow = true,
+        },
+        {
+            type = "sprite",
+            name = "ss-docked-"..spider.name.."-main",
+            layers = main_layers,
+        },
+        {
+            type = "sprite",
+            name = "ss-docked-"..spider.name.."-tint",
+            layers = tint_layers,
+        },
+    }
+end
+
+-- Loop through all spider vehicles
+for _, spider in pairs(data.raw["spider-vehicle"]) do
+    if not SPIDER_BLACK_LIST[spider.name] then
+        attempt_build_sprite(spider)
     end
 end

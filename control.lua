@@ -77,7 +77,7 @@ function draw_docked_spider(dock_data, spider_name, color)
     -- Draw shadows
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider_name.."-shadow", 
+            sprite = "ss-docked-"..spider_name.."-shadow", 
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
@@ -87,7 +87,7 @@ function draw_docked_spider(dock_data, spider_name, color)
     -- First draw main layer
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider_name.."-main", 
+            sprite = "ss-docked-"..spider_name.."-main", 
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
@@ -97,7 +97,7 @@ function draw_docked_spider(dock_data, spider_name, color)
     -- Then draw tinted layer
     table.insert(dock_data.docked_sprites, 
         rendering.draw_sprite{
-            sprite = "docked-"..spider_name.."-tint", 
+            sprite = "ss-docked-"..spider_name.."-tint", 
             target = dock, 
             surface = dock.surface,
             tint = color,
@@ -109,23 +109,19 @@ end
 -- An function to call when an dock action
 -- was not allowed. It will play the "no-no"
 -- sound and create some flying text
-function dock_error(player, dock, text)
+function dock_error(dock, text)
     -- TODO A future GUI should display the error message.
     -- because the flying text is obscure
-    dock.surface.play_sound{path="ss-no-no", position=dock.position}
-    if player then
-        -- We can only play a sound if there's an player
-        -- and there might be a case where the player
-        -- isn't specified
-        player.create_local_flying_text{
-            text = text,
-            position = {
-                dock.position.x,
-                dock.position.y,
-            },
-            color = {r=1,g=1,b=1,a=1},
-        }
-    end
+    dock.surface.play_sound{
+        path="ss-no-no", 
+        position=dock.position
+    }
+    dock.surface.create_entity{
+        name = "flying-text",
+        position = dock.position,
+        text = text,
+        color = {r=1,g=1,b=1,a=1},
+    }
 end
 
 -- Sometimes a dock will not support a specific
@@ -137,22 +133,28 @@ end
 -- spaceship tiles
 -- Will return the text to display if there is no support
 function dock_does_not_support_spider(dock, spider_name)
-    -- Only do this check though if player did turn
-    -- off restricting regular spiders to space
-    if settings.startup[
-        "space-spidertron-allow-other-spiders-in-space"].value then
-            return end
-        
-    -- Space spidertron is always allowed
-    if spider_name == "ss-space-spidertron" then return end
+    
+    -- Is this spider type supported in the first place?
+    -- We check this by looking if a sprite for this spider exists
+    -- as a bridge between the data and control stage. If it doesn't
+    -- exist then this spider can never dock
+    if not game.is_valid_sprite_path("ss-docked-"..spider_name.."-main") then
+        return {"space-spidertron-dock.spider-not-supported"}
+    end
 
-    -- Check if the dock is on a spaceship tile
-    -- This is not a full-proof check, as we check only one tile under the dock
-    -- and there are 4 that can potentially be a spaceship tile. However, in that
-    -- case the ship can't launch due to it's mechanics. And if the player really
-    -- wants to he can hack the system, so this check is good enough.
-    if dock.surface.get_tile(dock.position).name == "se-spaceship-floor" then
-        return {"space-spidertron-dock.spider-not-supported-on-tile"}
+    -- Is the dock on a tile that does not allow regular spiders to dock?
+    if not settings.startup["space-spidertron-allow-other-spiders-in-space"].value then
+        -- Space spidertron is always allowed
+        if spider_name ~= "ss-space-spidertron" then
+            -- Check if the dock is on a spaceship tile
+            -- This is not a full-proof check, as we check only one tile under the dock
+            -- and there are 4 that can potentially be a spaceship tile. However, in that
+            -- case the ship can't launch due to it's mechanics. And if the player really
+            -- wants to he can hack the system, so this check is good enough.
+            if dock.surface.get_tile(dock.position).name == "se-spaceship-floor" then
+                return {"space-spidertron-dock.spider-not-supported-on-tile"}
+            end
+        end
     end
 end
 
@@ -186,9 +188,7 @@ function attempt_dock(spider)
     -- Check if this spider is allowed to dock here
     local error_msg = dock_does_not_support_spider(dock, spider.name)
     if error_msg then
-        -- TODO display error message. Currently we cannot 
-        -- because we don't know which player issued the command
-        -- So lets fail silently
+        dock_error(dock, error_msg)
         return
     end
 
@@ -207,7 +207,7 @@ function attempt_dock(spider)
     end
 end
 
-function attempt_undock(player, dock_data, force)
+function attempt_undock(dock_data, force)
     if not dock_data.occupied then return end
     if not dock_data.serialized_spider then return end
     local serialized_spider = dock_data.serialized_spider
@@ -232,7 +232,7 @@ function attempt_undock(player, dock_data, force)
         -- Check if this spider is allowed to dock here
         local error_msg = dock_does_not_support_spider(dock, serialized_spider.name)
         if error_msg then
-            dock_error(player, dock, error_msg)
+            dock_error(dock, error_msg)
             return
         end
 
@@ -248,7 +248,7 @@ function attempt_undock(player, dock_data, force)
         } then
             -- It's not possible to undock as there is a collision
             -- Play a sound, and create some flying text
-            dock_error(player, dock, {"space-spidertron-dock.no-room"})
+            dock_error(dock, {"space-spidertron-dock.no-room"})
             return
         end
     end
@@ -352,12 +352,9 @@ script.on_event(defines.events.script_raised_built, on_built)
 function on_deconstructed(event)
     -- When the dock is destroyed then attempt undock the spider
     local entity = event.entity
-    local player = nil
-    if event.player_index then player = game.players[event.player_index] end
     if entity and entity.valid then
         if entity.name == "ss-spidertron-dock" then
-            attempt_undock(player,
-                get_dock_data_from_entity(entity), true)
+            attempt_undock(get_dock_data_from_entity(entity), true)
         end
     end
 end
@@ -491,8 +488,7 @@ end)
 script.on_event(defines.events.on_gui_click, function(event)
     local element = event.element
     if element.name == "spidertron-undock-button" then
-        attempt_undock(game.players[event.player_index],
-            get_dock_data_from_unit_number(
+        attempt_undock(get_dock_data_from_unit_number(
                 element.parent.tags.dock_unit_number))
     end
 end)

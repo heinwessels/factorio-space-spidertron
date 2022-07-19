@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.4
+Date: ??.07.2022
+  Changes:
+    - More resilliant to other mods' spider-vehicles, which are now marked as undockable.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.3
 Date: 17.07.2022
   Changes:
@@ -6,7 +11,6 @@ Date: 17.07.2022
     - Raise build event event when undocking spider.
   Bugfixes:
     - Fix always defaulting space spidertron to white, except when spawned from a rocket launch.
-
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 15.07.2022
