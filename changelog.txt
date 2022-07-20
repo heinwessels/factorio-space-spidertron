@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.4
-Date: ??.07.2022
+Date: 20.07.2022
   Changes:
     - More resilliant to other mods' spider-vehicles, which are now marked as undockable.
+    - More robust docking procedure by arming by spider instead of dock.
+    - More robust way of finding the technology to add the space spidertron to.
+    - Increase Space Spidertron recipe to use 100 rocket fuel (when applicable)
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.3
 Date: 17.07.2022

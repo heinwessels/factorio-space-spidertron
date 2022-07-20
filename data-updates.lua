@@ -41,36 +41,47 @@ if mods["space-exploration"] then
     -- The life needs to survice in space somehow
     table.insert(ingredients, {"se-lifesupport-canister", 5})
 else
-    table.insert(ingredients, {"rocket-fuel", 10})
+    table.insert(ingredients, {"rocket-fuel", 100})
 end
 
 data:extend{spider_recipe}
 
 
 ----==== Technology ====--
-local technology_unlocks_spidertron = false
+-- We will attempt to put the space spidertron
+-- at the same technology as the regular spidertron
+-- to keep things simple. First we will look
+-- for the "spidertron" technology, It might be possible
+-- that this tech is a dud, but whatever. If that
+-- doesn't exist then we will look for the tech
+-- that unlocks the regular "spidertron". And if 
+-- we don't find that then it will throw. 
+
+
+local spider_tech = data.raw.technology.spidertron
+
 for _, technology in pairs(data.raw.technology) do		
-    if not technology.enabled and technology.effects then			
+    if technology.effects then			
         for _, effect in pairs(technology.effects) do
             if effect.type == "unlock-recipe" then					
                 if effect.recipe == "spidertron" then
-                    technology_unlocks_spidertron = true
+                    spider_tech = technology
                 end
             end
         end
-        if technology_unlocks_spidertron then
-            table.insert(technology.effects, {
-                type = "unlock-recipe",
-                recipe = "ss-space-spidertron"
-            })
-            table.insert(technology.effects, {
-                type = "unlock-recipe",
-                recipe = "ss-spidertron-dock"
-            })
-            break
-        end
+        if spider_tech then break end
     end
 end
-if not technology_unlocks_spidertron then
+
+if not spider_tech then
     error("Could not find technology unlocking spidertron")
 end
+
+table.insert(spider_tech.effects, {
+    type = "unlock-recipe",
+    recipe = "ss-space-spidertron"
+})
+table.insert(spider_tech.effects, {
+    type = "unlock-recipe",
+    recipe = "ss-spidertron-dock"
+})
