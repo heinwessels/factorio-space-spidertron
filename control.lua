@@ -3,6 +3,7 @@ local spidertron_lib = require("lib.spidertron_lib")
 
 script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
+    global.spiders = global.spiders or {}
 
     -- Fix technologies
     local technology_unlocks_spidertron = false
@@ -30,15 +31,10 @@ function create_dock_data(dock_entity)
     return {
         occupied = false,
         serialized_spider = nil,
-        docked_sprites = {},
 
-        -- A dock will only allow a dock if
-        -- it's armed for a specific spidertron
-        -- This is because the spider doesn't always
-        -- stop on the dock itself. So rather when
-        -- the waypoint is added using a remote, 
-        -- then the dock is armed.
-        armed_for = nil,
+        -- Keep track of sprites drawed so we
+        -- can pop them out later.
+        docked_sprites = {},
 
         -- Can be nil when something goes wrong
         dock_entity = dock_entity,
@@ -65,6 +61,34 @@ function get_dock_data_from_unit_number(dock_unit_number)
         dock_data = global.docks[dock_unit_number]
     end
     return dock_data
+end
+
+function create_spider_data(spider_entity)
+    return {
+        -- A spider will only attempt to dock
+        -- if it's armed for that dock in
+        -- particular upon reaching it at
+        -- the end of the waypoint.
+        -- It's attempted to be set when the
+        -- player uses the spidertron remote.
+        armed_for = nil, -- Dock entity
+
+        -- Can be nil when something goes wrong
+        spider_entity = spider_entity,
+
+        -- Keep this in here so that it's easy to
+        -- find this entry in global
+        unit_number = spider_entity.unit_number
+    }
+end
+
+function get_spider_data_from_entity(spider)
+    local spider_data = global.spiders[spider.unit_number]
+    if not spider_data then
+        global.spiders[spider.unit_number] = create_spider_data(spider)
+        spider_data = global.spiders[spider.unit_number]
+    end
+    return spider_data
 end
 
 function draw_docked_spider(dock_data, spider_name, color)
@@ -159,22 +183,22 @@ function dock_does_not_support_spider(dock, spider_name)
 end
 
 -- This function will attempt the dock
--- of a spider. It will only work if
--- it's above a valid dock, etc.
+-- of a spider.
 function attempt_dock(spider)
-    -- Find the dock armed for this spider in the region
-    -- If none of the docks are armed for this spider then
-    -- ignore the command. This will likely happen when
-    --      - Dock was allocated for other spider
-    local dock = nil
+    local spider_data = get_spider_data_from_entity(spider)
+    if not spider_data.armed_for then return end
+
+    -- Find the dock this spider armed for in the region
+    -- We check the area because spidertrons are innacurate
+    -- and will not always stop on top of the dock
+    local dock = nil    
     for _, potential_dock in pairs(spider.surface.find_entities_filtered{
         name = "ss-spidertron-dock",
         position = spider.position,
         radius = 3,
         force = spider.force
     }) do
-        local potential_dock_data = get_dock_data_from_entity(potential_dock)
-        if potential_dock_data.armed_for == spider then
+        if spider_data.armed_for == potential_dock then
             dock = potential_dock
             break
         end
@@ -198,7 +222,7 @@ function attempt_dock(spider)
     dock.create_build_effect_smoke()
     dock.surface.play_sound{path="ss-spidertron-dock-1", position=dock.position}
     dock.surface.play_sound{path="ss-spidertron-dock-2", position=dock.position}
-    spider.destroy()
+    spider.destroy{raise_destroy=true}  -- This will clean the spider data too
     dock_data.occupied = true
 
     -- Update GUI's for all players
@@ -298,27 +322,24 @@ script.on_event(defines.events.on_spider_command_completed,
     end
 )
 
--- This will remove any previous
--- allocations to this dock
--- It's okay if the spider never reaches the dock
--- When a next spider tries to dock it will simply
--- overwrite the allocation
-function dock_arm_for_spider(dock, spider)
-    if dock.force ~= spider.force then return end
-    local dock_data = get_dock_data_from_entity(dock)
-    if dock_data.occupied then return end
-    dock_data.armed_for = spider -- Overwrite
-end
-
 script.on_event(defines.events.on_player_used_spider_remote , 
     function (event)
         local spider = event.vehicle
         if spider and spider.valid then
             local dock = spider.surface.find_entity("ss-spidertron-dock", event.position)
+            local spider_data = get_spider_data_from_entity(spider)
             if dock then
                 -- This waypoint was placed on a valid dock!
                 -- Arm the dock so that spider is allowed to dock there
-                dock_arm_for_spider(dock, spider)
+                local dock_data = get_dock_data_from_entity(dock)
+                if dock.force ~= spider.force then return end
+                if dock_data.occupied then return end
+                spider_data.armed_for = dock
+            else
+                -- The player directed the spider somewhere else
+                -- that's not a dock command. So remove any pending
+                -- dock arms
+                spider_data.armed_for = nil
             end
         end
     end
@@ -355,6 +376,9 @@ function on_deconstructed(event)
     if entity and entity.valid then
         if entity.name == "ss-spidertron-dock" then
             attempt_undock(get_dock_data_from_entity(entity), true)
+            global.docks[entity.unit_number] = nil
+        elseif entity.type == "spider-vehicle" then
+            global.spiders[entity.unit_number] = nil
         end
     end
 end
@@ -380,31 +404,31 @@ end)
 -- the sprites.
 -- Technically this can be called under different circumstances too
 -- but we will assume the spider always need to move to the
--- new location
+-- new locationpotential_dock
 script.on_event(defines.events.on_entity_cloned , function(event)
     local source = event.source
     local destination = event.destination
     if source and source.valid and destination and destination.valid then
         if source.name == "ss-spidertron-dock" then
-            local source_data = get_dock_data_from_entity(source)
+            local source_dock_data = get_dock_data_from_entity(source)
 
             -- If there's nothing docked at the source then we
             -- don't have to do anything
-            if not source_data.occupied then return end
+            if not source_dock_data.occupied then return end
             
             -- Move spider to new location
-            destination_data = util.copy(source_data)
-            destination_data.dock_entity = destination
-            destination_data.docked_sprites = {}
+            destination_dock_data = util.copy(source_dock_data)
+            destination_dock_data.dock_entity = destination
+            destination_dock_data.docked_sprites = {}
             draw_docked_spider(
-                destination_data, 
-                destination_data.serialized_spider.name,
-                destination_data.serialized_spider.color
+                destination_dock_data, 
+                destination_dock_data.serialized_spider.name,
+                destination_dock_data.serialized_spider.color
             )
-            global.docks[destination.unit_number] = destination_data
+            global.docks[destination.unit_number] = destination_dock_data
 
             -- Remove from old location
-            for _, sprite in pairs(source_data.docked_sprites) do
+            for _, sprite in pairs(source_dock_data.docked_sprites) do
                 rendering.destroy(sprite)
             end
             global.docks[source.unit_number] = nil
@@ -467,11 +491,6 @@ function update_dock_gui_for_player(player, dock)
         }
     end
 end
-
-script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
-script.on_event(defines.events.on_robot_mined_entity, on_deconstructed)
-script.on_event(defines.events.on_entity_died, on_deconstructed)
-script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 script.on_event(defines.events.on_gui_opened, function(event)
     local entity = event.entity
