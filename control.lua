@@ -83,6 +83,7 @@ function create_spider_data(spider_entity)
 end
 
 function get_spider_data_from_entity(spider)
+    if not global.spiders then return end
     local spider_data = global.spiders[spider.unit_number]
     if not spider_data then
         global.spiders[spider.unit_number] = create_spider_data(spider)
@@ -186,7 +187,7 @@ end
 -- of a spider.
 function attempt_dock(spider)
     local spider_data = get_spider_data_from_entity(spider)
-    if not spider_data.armed_for then return end
+    if not spider_data or not spider_data.armed_for then return end
 
     -- Find the dock this spider armed for in the region
     -- We check the area because spidertrons are innacurate
@@ -328,6 +329,7 @@ script.on_event(defines.events.on_player_used_spider_remote ,
         if spider and spider.valid then
             local dock = spider.surface.find_entity("ss-spidertron-dock", event.position)
             local spider_data = get_spider_data_from_entity(spider)
+            if not spider_data then return end
             if dock then
                 -- This waypoint was placed on a valid dock!
                 -- Arm the dock so that spider is allowed to dock there
