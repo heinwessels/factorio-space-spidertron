@@ -1,6 +1,11 @@
 local util = require("__core__/lualib/util")
 local spidertron_lib = require("lib.spidertron_lib")
 
+script.on_init(function()
+    global.docks = {}
+    global.spiders = {}
+end)
+
 script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
     global.spiders = global.spiders or {}
