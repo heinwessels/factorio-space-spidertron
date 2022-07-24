@@ -57,19 +57,22 @@ data:extend{spider_recipe}
 -- that unlocks the regular "spidertron". And if 
 -- we don't find that then it will throw. 
 
-
+-- The first try
 local spider_tech = data.raw.technology.spidertron
 
-for _, technology in pairs(data.raw.technology) do		
-    if technology.effects then			
-        for _, effect in pairs(technology.effects) do
-            if effect.type == "unlock-recipe" then					
-                if effect.recipe == "spidertron" then
-                    spider_tech = technology
+-- The second try
+if not spider_tech then
+    for _, technology in pairs(data.raw.technology) do		
+        if technology.effects then			
+            for _, effect in pairs(technology.effects) do
+                if effect.type == "unlock-recipe" then					
+                    if effect.recipe == "spidertron" then
+                        spider_tech = technology
+                    end
                 end
             end
+            if spider_tech then break end
         end
-        if spider_tech then break end
     end
 end
 
