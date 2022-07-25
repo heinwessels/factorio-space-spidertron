@@ -4,6 +4,20 @@ local spidertron_lib = require("lib.spidertron_lib")
 script.on_init(function()
     global.docks = {}
     global.spiders = {}
+
+    -- Add support for picker dollies
+    if remote.interfaces["PickerDollies"] 
+        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
+    end
+end)
+
+script.on_load(function()
+    -- Add support for picker dollies
+    if remote.interfaces["PickerDollies"] 
+        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
+    end
 end)
 
 script.on_configuration_changed(function (event)
@@ -133,6 +147,15 @@ function draw_docked_spider(dock_data, spider_name, color)
             target_offset = offset,
         }
     )
+end
+
+-- Destroys sprites from a dock and also removes
+-- their entries in it's data
+function pop_dock_sprites(dock_data)
+    for _, sprite in pairs(dock_data.docked_sprites) do
+        rendering.destroy(sprite)
+    end
+    dock_data.docked_sprites = {}
 end
 
 -- An function to call when an dock action
@@ -306,10 +329,7 @@ function attempt_undock(dock_data, force)
     dock_data.occupied = false
     dock_data.armed_for = nil
     dock_data.serialized_spider = nil
-    for _, sprite in pairs(dock_data.docked_sprites) do
-        rendering.destroy(sprite)
-    end
-    dock_data.docked_sprites = {}
+    pop_dock_sprites(dock_data)
 
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
@@ -403,6 +423,25 @@ script.on_event(defines.events.on_gui_opened, function(event)
     end
 end)
 
+-- We can move docks with picker dollies, regardless
+-- of if it contains a spider or not. All we really
+-- have to do is redraw the sprites, because the dock
+-- entity remains the same entity. It's only moved.
+function picker_dollies_move_event(event)
+    local dock = event_moved_entity
+    if not dock or dock.valid then return end
+    local dock_data = get_dock_data_from_entity(dock)
+
+    -- If there's a spider, then update the sprites
+    if dock_data.occupied then
+        pop_dock_sprites(dock_data)
+        draw_docked_spider(
+            dock_data, 
+            dock_data.serialized_spider.name,
+            dock_data.serialized_spider.color
+        )
+    end
+end
 
 -- This function is called when the spaceship changes
 -- surfaces. We need to update our global tables and redraw
