@@ -149,3 +149,48 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
         attempt_build_sprite(spider)
     end
 end
+
+
+-- Create the docking light. Not strictly a _spidertron_
+-- sprite, but it's declared here anyway
+data:extend{
+    {
+        -- We declare it as an animation because that can
+        -- animate and have act as a light as well
+        type = "animation",
+        name = "ss-docked-light",
+        layers = {
+            {
+                filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+                blend_mode = "additive",
+                draw_as_glow = true,    -- Draws a sprite and a light
+                width = 19,
+                height = 19,
+                shift = { -0.42, 0.5 },
+                scale = 0.4,
+                run_mode = "forward-then-backward",
+                frame_count = 16,
+                line_length = 8,
+                -- 3 second loop, meaning 16 frames per 180 ticks
+                animation_speed = 0.088, -- frames per tick
+
+                hr_version =
+                {
+                    filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+                    blend_mode = "additive",
+                    draw_as_glow = true,    -- Draws a sprite and a light
+                    width = 19,
+                    height = 19,
+                    shift = { -0.42, 0.5 },
+                    scale = 0.4,
+                    run_mode = "forward-then-backward",
+                    frame_count = 16,
+                    line_length = 8,
+
+                    -- 3 second loop, meaning 16 frames per 180 ticks
+                    animation_speed = 0.088, -- frames per tick
+                }
+            }
+        }
+    }
+}

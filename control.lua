@@ -147,6 +147,16 @@ function draw_docked_spider(dock_data, spider_name, color)
             target_offset = offset,
         }
     )
+
+    -- Finally draw the light animation
+    table.insert(dock_data.docked_sprites, 
+        rendering.draw_animation{
+            animation = "ss-docked-light", 
+            target = dock, 
+            surface = dock.surface,
+            target_offset = offset,
+        }
+    )
 end
 
 -- Destroys sprites from a dock and also removes
