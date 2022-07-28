@@ -1,51 +1,6 @@
 local util = require("__core__/lualib/util")
 local spidertron_lib = require("lib.spidertron_lib")
 
-script.on_init(function()
-    global.docks = {}
-    global.spiders = {}
-
-    -- Add support for picker dollies
-    if remote.interfaces["PickerDollies"] 
-        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
-        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
-    end
-end)
-
-script.on_load(function()
-    -- Add support for picker dollies
-    if remote.interfaces["PickerDollies"] 
-        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
-        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
-    end
-end)
-
-script.on_configuration_changed(function (event)
-    global.docks = global.docks or {}
-    global.spiders = global.spiders or {}
-
-    -- Fix technologies
-    local technology_unlocks_spidertron = false
-    for index, force in pairs(game.forces) do
-        for _, technology in pairs(force.technologies) do		
-            if technology.effects then			
-                for _, effect in pairs(technology.effects) do
-                    if effect.type == "unlock-recipe" then					
-                        if effect.recipe == "spidertron" then
-                            technology_unlocks_spidertron = true
-                        end
-                    end
-                end
-                if technology_unlocks_spidertron then
-                    force.recipes["ss-space-spidertron"].enabled = technology.researched
-                    force.recipes["ss-spidertron-dock"].enabled = technology.researched
-                    break
-                end
-            end
-        end
-    end
-end)
-
 function create_dock_data(dock_entity)
     return {
         occupied = false,
@@ -155,6 +110,7 @@ function draw_docked_spider(dock_data, spider_name, color)
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
+            animation_offset = math.random(15) -- Not sure how to start at frame 0
         }
     )
 end
@@ -563,5 +519,75 @@ script.on_event(defines.events.on_gui_click, function(event)
     if element.name == "spidertron-undock-button" then
         attempt_undock(get_dock_data_from_unit_number(
                 element.parent.tags.dock_unit_number))
+    end
+end)
+
+-- This will be called when something changes
+-- to ensure all docks are drawn on the most
+-- up-to-date way
+function redraw_all_docks()
+    for _, surface in pairs(game.surfaces) do
+        for _, dock in pairs(surface.find_entities_filtered{
+            name = "ss-spidertron-dock"
+        }) do
+            if global.docks[dock.unit_number] then
+                local dock_data = get_dock_data_from_entity(dock)
+                if dock_data.occupied then
+                    pop_dock_sprites(dock_data)
+                    draw_docked_spider(
+                        dock_data, 
+                        dock_data.serialized_spider.name,
+                        dock_data.serialized_spider.color
+                    )
+                end
+            end
+        end
+    end
+end
+
+script.on_init(function()
+    global.docks = {}
+    global.spiders = {}
+
+    -- Add support for picker dollies
+    if remote.interfaces["PickerDollies"] 
+        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
+    end
+end)
+
+script.on_load(function()
+    -- Add support for picker dollies
+    if remote.interfaces["PickerDollies"] 
+        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+        script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
+    end
+end)
+
+script.on_configuration_changed(function (event)
+    global.docks = global.docks or {}
+    global.spiders = global.spiders or {}
+
+    redraw_all_docks()
+
+    -- Fix technologies
+    local technology_unlocks_spidertron = false
+    for index, force in pairs(game.forces) do
+        for _, technology in pairs(force.technologies) do		
+            if technology.effects then			
+                for _, effect in pairs(technology.effects) do
+                    if effect.type == "unlock-recipe" then					
+                        if effect.recipe == "spidertron" then
+                            technology_unlocks_spidertron = true
+                        end
+                    end
+                end
+                if technology_unlocks_spidertron then
+                    force.recipes["ss-space-spidertron"].enabled = technology.researched
+                    force.recipes["ss-spidertron-dock"].enabled = technology.researched
+                    break
+                end
+            end
+        end
     end
 end)
