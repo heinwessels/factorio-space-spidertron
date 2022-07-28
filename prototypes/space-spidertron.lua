@@ -87,7 +87,7 @@ local spider = {
   },
   minimap_representation =
   {
-    filename = "__base__/graphics/entity/spidertron/spidertron-map.png",
+    filename = "__space-spidertron__/graphics/space-spidertron/space-spidertron-map.png",
     flags = {"icon"},
     size = {128, 128},
     scale = 0.5

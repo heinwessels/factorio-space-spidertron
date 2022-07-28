@@ -4,6 +4,7 @@ Date: ??.??.2022
   Features:
     - Add support for Picker Dollies.
     - Added a breathing light to the dock.
+    - Added custom mini-map representation.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.5
 Date: 24.07.2022
