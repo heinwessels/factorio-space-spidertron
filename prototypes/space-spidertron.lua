@@ -126,6 +126,13 @@ local spider = {
   },
 }
 
+if mods["Krastorio2"] then
+  -- K2 has a custom grid for spiders that supports
+  -- all the custom equipment. Change our spider to use 
+  -- the same grid
+  spider.equipment_grid = "kr-spidertron-equipment-grid"
+end
+
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
 torso_bottom_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
 torso_bottom_layers[1].hr_version.filename = "__space-spidertron__/graphics/space-spidertron/hr-space-spidertron-body-bottom.png"
@@ -193,6 +200,7 @@ table.insert(torso_bottom_layers, 1, {
   }
 })
 
+-- Add leg
 for _, leg in pairs(spider.spider_engine.legs) do
    leg.ground_position = {0, 0}
    leg.leg_hit_the_ground_trigger = nil
