@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
-Date: ??.??.2022
+Date: 29.07.2022
   Features:
     - Add support for Picker Dollies.
     - Added a breathing light to the dock.
