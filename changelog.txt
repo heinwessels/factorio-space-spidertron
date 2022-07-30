@@ -5,6 +5,8 @@ Date: ??.??.2022
     - Support Krastorio2 equipment (Thanks runtimethecat!).
   Changes:
     - With Krastorio2 installed Space Spidertron now requries fuel.
+  Bugfixes:
+    - Fixed possible crash if docked spider's equipment no longer exists when undocking.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
 Date: 29.07.2022
