@@ -3,6 +3,8 @@ Version: 0.2.1
 Date: ??.??.2022
   Features:
     - Support Krastorio2 equipment (Thanks runtimethecat!).
+  Changes:
+    - With Krastorio2 installed Space Spidertron now requries fuel.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
 Date: 29.07.2022

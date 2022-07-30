@@ -127,10 +127,24 @@ local spider = {
 }
 
 if mods["Krastorio2"] then
-  -- K2 has a custom grid for spiders that supports
-  -- all the custom equipment. Change our spider to use 
-  -- the same grid
+  -- K2 does some custom things to all spidertrons.
+  -- Redo them all here. I could simply take them from
+  -- the spidertron prototype, but I don't want to rely
+  -- on it existing. And I'd rather have fine control
+  -- over what's happening.
+  -- Note: Migrating equipment to a new grid type happens automatically.
   spider.equipment_grid = "kr-spidertron-equipment-grid"
+  spider.movement_energy_consumption = "3MW"
+  spider.energy_source = {
+    type = "burner",
+    emissions_per_minute = 0,
+    effectivity = 1,
+    render_no_power_icon = true,
+    render_no_network_icon = false,
+    fuel_inventory_size = 1,
+    burnt_inventory_size = 1,
+    fuel_category = "fusion-fuel",
+  }
 end
 
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
