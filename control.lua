@@ -6,6 +6,13 @@ function create_dock_data(dock_entity)
         occupied = false,
         serialized_spider = nil,
 
+        -- Remember when the spider docked,
+        -- or nil when no spider docked. Will 
+        -- hopefully be used to show how long
+        -- a spider has been docked in the
+        -- dock GUI
+        tick_docked = nil,
+
         -- Keep track of sprites drawed so we
         -- can pop them out later.
         docked_sprites = {},
@@ -15,7 +22,7 @@ function create_dock_data(dock_entity)
 
         -- Keep this in here so that it's easy to
         -- find this entry in global
-        unit_number = dock_entity.unit_number
+        unit_number = dock_entity.unit_number,
     }
 end
 
@@ -52,7 +59,16 @@ function create_spider_data(spider_entity)
 
         -- Keep this in here so that it's easy to
         -- find this entry in global
-        unit_number = spider_entity.unit_number
+        unit_number = spider_entity.unit_number,
+
+        -- Store a reference to the last dock this
+        -- spider docked to. It's so that you can 
+        -- click "return to dock" on a spider.
+        -- This system will be dum, so if the dock
+        -- is no longer valid then it will do nothing.
+        -- If the dock is occupied then it will still return
+        -- but simply fail to dock
+        last_used_dock = nil,
     }
 end
 
@@ -216,8 +232,9 @@ function attempt_dock(spider)
     dock.create_build_effect_smoke()
     dock.surface.play_sound{path="ss-spidertron-dock-1", position=dock.position}
     dock.surface.play_sound{path="ss-spidertron-dock-2", position=dock.position}
-    spider.destroy{raise_destroy=true}  -- This will clean the spider data too
+    spider.destroy{raise_destroy=true}  -- This will clean the spider data in the destroy event
     dock_data.occupied = true
+    dock_data.tick_docked = game.tick
 
     -- Update GUI's for all players
     for _, player in pairs(game.players) do
@@ -290,6 +307,8 @@ function attempt_undock(dock_data, force)
     dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
     spidertron_lib.deserialise_spidertron(spider, serialized_spider)
     spider.torso_orientation = 0.6 -- Similar to sprite orientation
+    local spider_data = get_spider_data_from_entity(spider)
+    spider_data.last_used_dock = dock
 
     -- Success!
     dock_data.occupied = false

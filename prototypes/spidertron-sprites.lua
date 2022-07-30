@@ -20,9 +20,10 @@
 local util = require("__core__/lualib/util")
 
 
--- Hardcoded blacklist. Can make this more dynamic in the future
+-- Hardcoded blacklist. Can possibly make this more dynamic in the future
 local SPIDER_BLACK_LIST = {
     ["se-burbulator"] = true,
+    ["companion"] = true,
 }
 
 -- This function will dictate if a spider is
