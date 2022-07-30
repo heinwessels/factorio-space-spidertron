@@ -294,6 +294,7 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
   if previous_grid_contents then
     for _, equipment in pairs(previous_grid_contents) do
       if game.equipment_prototypes[equipment.name] then
+        -- Only attempt deserialization if equipment prototype still exists
         if spidertron_grid then
           local placed_equipment = spidertron_grid.put( {name=equipment.name, position=equipment.position} )
           if placed_equipment then
@@ -317,7 +318,6 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
           spidertron.surface.spill_item_stack(spidertron.position, {name=equipment.name})
         end
       end
-      -- If the equipment prototype doesn't exist ignore it.
     end
   end
 

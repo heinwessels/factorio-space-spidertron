@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
-Date: ??.??.2022
+Date: 30.07.2022
   Features:
     - Support Krastorio2 equipment (Thanks runtimethecat!).
   Changes:
