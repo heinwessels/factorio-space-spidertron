@@ -271,21 +271,10 @@ function attempt_undock(dock_data, force)
             return
         end
 
-        -- First check if there's space to build the spider
-        -- The spider will try to fit it's feet between obstacles.
-        if not dock.surface.can_place_entity{
-            name = serialized_spider.name,
-            position = dock.position,
-            force = dock.force,
-
-            -- Needs to be manual, don't know why
-            build_check_type = defines.build_check_type.manual,
-        } then
-            -- It's not possible to undock as there is a collision
-            -- Play a sound, and create some flying text
-            dock_error(dock, {"space-spidertron-dock.no-room"})
-            return
-        end
+        -- We do no collision checks. We prevent normal spiders
+        -- from undocking on spaceships by checking the tile
+        -- and spider combination. And there *should* always be space
+        -- for the legs next to the dock and whatever is next to it
     end
 
     -- Create a empty spider and apply the
