@@ -1,8 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.2
-Date: ??.??.2022
+Date: 31.7.2022
   Changes:
     - No longer do collision checks when undocking.
+  Bugfixes:
+    - [SEK2] Space Spidertron now also supports nuclear fuel.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 30.07.2022

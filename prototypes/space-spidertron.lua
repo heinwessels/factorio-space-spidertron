@@ -143,8 +143,13 @@ if mods["Krastorio2"] then
     render_no_network_icon = false,
     fuel_inventory_size = 1,
     burnt_inventory_size = 1,
-    fuel_category = "fusion-fuel",
+    fuel_categories = {"fusion-fuel"},
   }
+
+  -- However, if SE is also installed then it's changed again
+  if mods["space-exploration"] then
+    table.insert(spider.energy_source.fuel_categories, "nuclear")
+  end
 end
 
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
