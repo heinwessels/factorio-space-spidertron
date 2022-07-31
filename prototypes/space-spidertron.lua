@@ -20,7 +20,7 @@ local spider = {
   close_sound = { filename = "__base__/sound/spidertron/spidertron-door-close.ogg", volume = 0.4 },
   sound_minimum_speed = 0.1,
   sound_scaling_ratio = 0.6,
-  allow_passengers = false,
+  allow_passengers = true,   -- It's a nice space vehicle
   working_sound =
   {
     sound =

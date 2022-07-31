@@ -1,10 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.3
+Date: 31.7.2022
+  Changes:
+    - Space Spidertrons now support drivers (Thanks Klezmer!).
+---------------------------------------------------------------------------------------------------
 Version: 0.2.2
 Date: 31.7.2022
   Changes:
     - No longer do collision checks when undocking.
   Bugfixes:
-    - [SEK2] Space Spidertron now also supports nuclear fuel.
+    - [SEK2] Space Spidertron now also supports nuclear fuel (Again, thanks runtimethecat!).
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 30.07.2022
