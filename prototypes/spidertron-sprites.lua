@@ -22,8 +22,15 @@ local util = require("__core__/lualib/util")
 
 -- Hardcoded blacklist. Can possibly make this more dynamic in the future
 local SPIDER_BLACK_LIST = {
+    -- Space Exploration
     ["se-burbulator"] = true,
+
+    -- Companions
     ["companion"] = true,
+
+    -- Combat Mechanics Overhaul
+    ["defender-unit"] = true,
+    ["destroyer-unit"] = true,
 }
 
 -- This function will dictate if a spider is
@@ -89,6 +96,10 @@ function attempt_build_sprite(spider)
     -- Sanitize the and add the body layer. 
     for index, layer in pairs(torso_body_layers) do
 
+        -- Rudemental sanity check to see if this is a
+        -- normal-ish spidertron
+        if layer.direction_count ~= 64 then return end
+
         -- The body layer contains animations for all rotations,
         -- So change {x,y} to a nice looking one
         -- TODO This can be smarter
@@ -108,6 +119,10 @@ function attempt_build_sprite(spider)
     -- NB: We're not building the "bottom" shadows,
     -- because the bottom is not currently drawn
     for index, layer in pairs({torso_body_shadow}) do
+
+        -- Rudemental sanity check to see if this is a
+        -- normal-ish spidertron
+        if layer.direction_count ~= 64 then return end
 
         -- The body layer contains animations for all rotations,
         -- So change {x,y} to a nice looking one
