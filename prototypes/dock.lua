@@ -7,9 +7,11 @@ local localised_description = {"",
 if mods["space-exploration"] then
   localised_description = {"", 
     {"space-spidertron-dock.description-se"}, 
-    {"space-spidertron-dock.description-use"}
+    {"space-spidertron-dock.description-use"},
   }
 end
+
+table.insert(localised_description, {"space-spidertron-dock.supported"})
 
 local dock = {
     -- Type radar so that we have an animation to work with

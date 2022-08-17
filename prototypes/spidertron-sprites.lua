@@ -157,15 +157,30 @@ function attempt_build_sprite(spider)
             layers = tint_layers,
         },
     }
+
+    return true
 end
 
 -- Loop through all spider vehicles
+local found_at_least_one = false
+local dock_description = data.raw.accumulator["ss-spidertron-dock"].localised_description
 for _, spider in pairs(data.raw["spider-vehicle"]) do
     if not SPIDER_BLACK_LIST[spider.name] then
-        attempt_build_sprite(spider)
+        if attempt_build_sprite(spider) then
+            found_at_least_one = true
+
+            -- Update dock description to show supported 
+            -- This will update both the entity and the item
+            -- because they use the same table
+            table.insert(dock_description, 
+                {"", {"space-spidertron-dock.supported-spider", spider.name}})
+        end
     end
 end
 
+if not found_at_least_one then
+    error("Could not find any spiders that can dock")
+end
 
 -- Create the docking light. Not strictly a _spidertron_
 -- sprite, but it's declared here anyway

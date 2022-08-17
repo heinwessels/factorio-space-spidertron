@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.2.3
-Date: 31.7.2022
+Version: 0.2.4
+Date: 17.08.2022
+  Changes:
+    - Dock now shows compatible spider vehicles.
   Bugfixes:
     - Now compatible with Combat Robots Overhaul (Thanks FuzzyOne!)
 ---------------------------------------------------------------------------------------------------
