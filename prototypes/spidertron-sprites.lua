@@ -74,6 +74,12 @@ function attempt_build_sprite(spider)
 
     if not torso_bottom_layers or not torso_body_layers or not torso_body_shadow then return end
 
+    -- AAI Programmable Vehicles compatability:
+    -- We don't display the AI version of the spider. Such spiders usually
+    -- end with "-rocket-1" or something. This is a silly check, but should
+    -- be good enough for now.
+    if string.match(spider.name, "-[0-9]+$") then return end
+
     -- Sanitize and add the bottom layers
     for index, layer in pairs(torso_bottom_layers) do
         -- Actually, we don't want to draw the bottom.
@@ -172,7 +178,6 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
             -- Update dock description to show supported 
             -- This will update both the entity and the item
             -- because they use the same table
-            -- 
             if (#dock_description + 1) < 20 then -- +1 for the empty "" at the start
                 if (#dock_description + 1) < 19 then
                     table.insert(dock_description, 

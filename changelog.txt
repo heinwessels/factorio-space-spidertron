@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.5
-Date: ??.08.2022
+Date: 19.08.2022
+  Changes:
+    - AAI Programmable Vehicles: AI versions can no longer dock.
   Bugfixes:
     - Prevent crash when too many dockable spidertrons exist (Thanks viperfan7!)
 ---------------------------------------------------------------------------------------------------
