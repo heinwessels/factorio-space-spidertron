@@ -172,8 +172,15 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
             -- Update dock description to show supported 
             -- This will update both the entity and the item
             -- because they use the same table
-            table.insert(dock_description, 
-                {"", {"space-spidertron-dock.supported-spider", spider.name}})
+            -- 
+            if (#dock_description + 1) < 20 then -- +1 for the empty "" at the start
+                if (#dock_description + 1) < 19 then
+                    table.insert(dock_description, 
+                        {"space-spidertron-dock.supported-spider", spider.name})
+                else
+                    table.insert(dock_description, {"space-spidertron-dock.etc"})
+                end
+            end
         end
     end
 end
