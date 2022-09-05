@@ -4,18 +4,16 @@ local spidertron_lib = require("lib.spidertron_lib")
 function create_dock_data(dock_entity)
     return {
         occupied = false,
-        serialized_spider = nil,
-
-        -- Remember when the spider docked,
-        -- or nil when no spider docked. Will 
-        -- hopefully be used to show how long
-        -- a spider has been docked in the
-        -- dock GUI
-        tick_docked = nil,
 
         -- Keep track of sprites drawed so we
         -- can pop them out later.
         docked_sprites = {},
+        
+        -- Remember the normal type of the spider docked here
+        spider_name = nil,
+
+        -- Keep a reference to the docked spider
+        docked_spider = nil,
 
         -- Can be nil when something goes wrong
         dock_entity = dock_entity,
@@ -87,6 +85,7 @@ function draw_docked_spider(dock_data, spider_name, color)
     -- Offset to place sprite at correct location
     -- This assumes we're not drawing the bottom
     local offset = {0, -0.35}
+    local render_layer = "object"
     
     -- Draw shadows
     table.insert(dock_data.docked_sprites, 
@@ -95,6 +94,7 @@ function draw_docked_spider(dock_data, spider_name, color)
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
+            render_layer = render_layer,
         }
     )
 
@@ -105,6 +105,7 @@ function draw_docked_spider(dock_data, spider_name, color)
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
+            render_layer = render_layer,
         }
     )
 
@@ -116,6 +117,7 @@ function draw_docked_spider(dock_data, spider_name, color)
             surface = dock.surface,
             tint = color,
             target_offset = offset,
+            render_layer = render_layer,
         }
     )
 
@@ -126,7 +128,8 @@ function draw_docked_spider(dock_data, spider_name, color)
             target = dock, 
             surface = dock.surface,
             target_offset = offset,
-            animation_offset = math.random(15) -- Not sure how to start at frame 0
+            render_layer = render_layer,
+            animation_offset = math.random(15), -- Not sure how to start at frame 0
         }
     )
 end
@@ -192,6 +195,82 @@ function dock_does_not_support_spider(dock, spider_name)
     end
 end
 
+-- This will dock a spider, and not
+-- do any checks.
+function dock_spider(dock, spider)
+    local spider_data = get_spider_data_from_entity(spider)
+    local dock_data = get_dock_data_from_entity(dock)
+
+    -- Some smoke and mirrors
+    dock.create_build_effect_smoke()
+    dock.surface.play_sound{path="ss-spidertron-dock-1", position=dock.position}
+    dock.surface.play_sound{path="ss-spidertron-dock-2", position=dock.position}
+    
+    -- Create the docked variant
+    -- draw_docked_spider(dock_data, spider.name, spider.color) -- TODO Waiting for bounce speed functionality
+    local docked_spider = spider.surface.create_entity{
+        name = "ss-docked-"..spider.name,
+        position = {
+            dock.position.x,
+            dock.position.y + 0.01 -- To draw spidertron over dock entity
+        },
+        force = spider.force,
+        raise_built = false, -- Because it's not a real spider
+    }
+    local serialized_spider = spidertron_lib.serialise_spidertron(spider)
+    -- TODO Carefully remove guns
+    spidertron_lib.deserialise_spidertron(docked_spider, serialized_spider)
+    docked_spider.torso_orientation = 0.6 -- Similar to sprite orientation
+    
+    -- Remove
+    spider.destroy{raise_destroy=true}  -- This will clean the spider data in the destroy event
+    
+    -- Keep some notes
+    dock_data.spider_name = serialized_spider.name
+    dock_data.occupied = true
+    dock_data.docked_spider = docked_spider
+end
+
+-- This will undock a spider, and not
+-- do any checks.
+function undock_spider(dock, docked_spider)
+    local docked_spider_data = get_spider_data_from_entity(docked_spider)
+    local dock_data = get_dock_data_from_entity(dock)
+
+    -- Some smoke and mirrors
+    dock.surface.play_sound{path="ss-spidertron-undock-1", position=dock.position}
+    dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
+
+    -- Create the regular spider again
+    local spider = dock.surface.create_entity{
+        name = dock_data.spider_name,
+        position = docked_spider.position,
+        force = docked_spider.force,
+        create_build_effect_smoke = true,   -- Looks nice
+
+        -- To help other mods keep track of this entity
+        raise_built = true,
+    }
+    if not spider then
+        -- TODO Handle this error nicely!
+        error("Error! Couldn't spawn spider!\n"..serpent.block(dock_data))
+    end
+    local serialized_spider = spidertron_lib.serialise_spidertron(docked_spider)
+    spidertron_lib.deserialise_spidertron(spider, serialized_spider)
+    spider.torso_orientation = 0.6 -- Similar to sprite orientation
+    local spider_data = get_spider_data_from_entity(spider)
+    spider_data.last_used_dock = dock
+
+    -- Clean up
+    docked_spider.destroy{raise_destroy=false}  -- False because it's not a real spider
+    pop_dock_sprites(dock_data)
+
+    -- Take some notes
+    dock_data.docked_spider = nil
+    dock_data.occupied = false
+    dock_data.serialized_spider = nil
+end
+
 -- This function will attempt the dock
 -- of a spider.
 function attempt_dock(spider)
@@ -227,14 +306,7 @@ function attempt_dock(spider)
     end
 
     -- Dock the spider!
-    draw_docked_spider(dock_data, spider.name, spider.color)
-    dock_data.serialized_spider = spidertron_lib.serialise_spidertron(spider)
-    dock.create_build_effect_smoke()
-    dock.surface.play_sound{path="ss-spidertron-dock-1", position=dock.position}
-    dock.surface.play_sound{path="ss-spidertron-dock-2", position=dock.position}
-    spider.destroy{raise_destroy=true}  -- This will clean the spider data in the destroy event
-    dock_data.occupied = true
-    dock_data.tick_docked = game.tick
+    dock_spider(dock, spider)
 
     -- Update GUI's for all players
     for _, player in pairs(game.players) do
@@ -244,8 +316,6 @@ end
 
 function attempt_undock(dock_data, force)
     if not dock_data.occupied then return end
-    if not dock_data.serialized_spider then return end
-    local serialized_spider = dock_data.serialized_spider
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
     
@@ -265,7 +335,7 @@ function attempt_undock(dock_data, force)
     if force ~= true then
 
         -- Check if this spider is allowed to dock here
-        local error_msg = dock_does_not_support_spider(dock, serialized_spider.name)
+        local error_msg = dock_does_not_support_spider(dock, dock_data.spider_name)
         if error_msg then
             dock_error(dock, error_msg)
             return
@@ -277,33 +347,8 @@ function attempt_undock(dock_data, force)
         -- for the legs next to the dock and whatever is next to it
     end
 
-    -- Create a empty spider and apply the
-    -- serialized spider onto that spider
-    local spider = dock.surface.create_entity{
-        name = serialized_spider.name,
-        position = dock.position,
-        force = dock.force,
-        create_build_effect_smoke = true,   -- Looks nice
-
-        -- To help other mods keep track of this entity
-        create_entity = true,
-    }
-    if not spider then
-        -- TODO Handle this error nicely!
-        error("Error! Couldn't spawn spider!\n"..serpent.block(dock_data))
-    end
-    dock.surface.play_sound{path="ss-spidertron-undock-1", position=dock.position}
-    dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
-    spidertron_lib.deserialise_spidertron(spider, serialized_spider)
-    spider.torso_orientation = 0.6 -- Similar to sprite orientation
-    local spider_data = get_spider_data_from_entity(spider)
-    spider_data.last_used_dock = dock
-
-    -- Success!
-    dock_data.occupied = false
-    dock_data.armed_for = nil
-    dock_data.serialized_spider = nil
-    pop_dock_sprites(dock_data)
+    -- Undock the spider!
+    undock_spider(dock, dock_data.docked_spider)    
 
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
