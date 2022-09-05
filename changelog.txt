@@ -1,4 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.5
+Date: 19.08.2022
+  Changes:
+    - AAI Programmable Vehicles: AI versions can no longer dock.
+  Bugfixes:
+    - Prevent crash when too many dockable spidertrons exist (Thanks viperfan7!)
+---------------------------------------------------------------------------------------------------
+Version: 0.2.4
+Date: 17.08.2022
+  Changes:
+    - Dock now shows compatible spider vehicles.
+  Bugfixes:
+    - Now compatible with Combat Robots Overhaul (Thanks FuzzyOne!)
+---------------------------------------------------------------------------------------------------
 Version: 0.2.3
 Date: 31.7.2022
   Changes:

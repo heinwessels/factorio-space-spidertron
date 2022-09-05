@@ -22,8 +22,15 @@ local util = require("__core__/lualib/util")
 
 -- Hardcoded blacklist. Can possibly make this more dynamic in the future
 local SPIDER_BLACK_LIST = {
+    -- Space Exploration
     ["se-burbulator"] = true,
+
+    -- Companions
     ["companion"] = true,
+
+    -- Combat Mechanics Overhaul
+    ["defender-unit"] = true,
+    ["destroyer-unit"] = true,
 }
 
 -- This function will dictate if a spider is
@@ -67,6 +74,12 @@ function attempt_build_sprite(spider)
 
     if not torso_bottom_layers or not torso_body_layers or not torso_body_shadow then return end
 
+    -- AAI Programmable Vehicles compatability:
+    -- We don't display the AI version of the spider. Such spiders usually
+    -- end with "-rocket-1" or something. This is a silly check, but should
+    -- be good enough for now.
+    if string.match(spider.name, "-[0-9]+$") then return end
+
     -- Sanitize and add the bottom layers
     for index, layer in pairs(torso_bottom_layers) do
         -- Actually, we don't want to draw the bottom.
@@ -89,6 +102,10 @@ function attempt_build_sprite(spider)
     -- Sanitize the and add the body layer. 
     for index, layer in pairs(torso_body_layers) do
 
+        -- Rudemental sanity check to see if this is a
+        -- normal-ish spidertron
+        if layer.direction_count ~= 64 then return end
+
         -- The body layer contains animations for all rotations,
         -- So change {x,y} to a nice looking one
         -- TODO This can be smarter
@@ -108,6 +125,10 @@ function attempt_build_sprite(spider)
     -- NB: We're not building the "bottom" shadows,
     -- because the bottom is not currently drawn
     for index, layer in pairs({torso_body_shadow}) do
+
+        -- Rudemental sanity check to see if this is a
+        -- normal-ish spidertron
+        if layer.direction_count ~= 64 then return end
 
         -- The body layer contains animations for all rotations,
         -- So change {x,y} to a nice looking one
@@ -142,15 +163,36 @@ function attempt_build_sprite(spider)
             layers = tint_layers,
         },
     }
+
+    return true
 end
 
 -- Loop through all spider vehicles
+local found_at_least_one = false
+local dock_description = data.raw.accumulator["ss-spidertron-dock"].localised_description
 for _, spider in pairs(data.raw["spider-vehicle"]) do
     if not SPIDER_BLACK_LIST[spider.name] then
-        attempt_build_sprite(spider)
+        if attempt_build_sprite(spider) then
+            found_at_least_one = true
+
+            -- Update dock description to show supported 
+            -- This will update both the entity and the item
+            -- because they use the same table
+            if (#dock_description + 1) < 20 then -- +1 for the empty "" at the start
+                if (#dock_description + 1) < 19 then
+                    table.insert(dock_description, 
+                        {"space-spidertron-dock.supported-spider", spider.name})
+                else
+                    table.insert(dock_description, {"space-spidertron-dock.etc"})
+                end
+            end
+        end
     end
 end
 
+if not found_at_least_one then
+    error("Could not find any spiders that can dock")
+end
 
 -- Create the docking light. Not strictly a _spidertron_
 -- sprite, but it's declared here anyway
