@@ -370,6 +370,27 @@ script.on_event(defines.events.on_player_used_spider_remote ,
     function (event)
         local spider = event.vehicle
         if spider and spider.valid then
+
+            -- First check if this is a docked spider. If it is, ignore this
+            -- spider remote command
+            if string.match(spider.name, "ss[-]docked[-]") then
+                -- This is a docked spider! Prevent the auto pilot
+                spider.follow_target = nil
+                spider.autopilot_destination = nil
+
+                -- Let the player know
+                spider.surface.play_sound{path="ss-no-no", position=spider.position}
+                spider.surface.create_entity{
+                    name = "flying-text",
+                    position = spider.position,
+                    text = {"space-spidertron-dock.cannot-command"},
+                    color = {r=1,g=1,b=1,a=1},
+                }
+                
+                -- Don't do anything else
+                return
+            end
+
             local dock = spider.surface.find_entity("ss-spidertron-dock", event.position)
             local spider_data = get_spider_data_from_entity(spider)
             if dock then
@@ -431,16 +452,6 @@ script.on_event(defines.events.on_player_mined_entity, on_deconstructed)
 script.on_event(defines.events.on_robot_mined_entity, on_deconstructed)
 script.on_event(defines.events.on_entity_died, on_deconstructed)
 script.on_event(defines.events.script_raised_destroy, on_deconstructed)
-
-script.on_event(defines.events.on_gui_opened, function(event)
-    if event.gui_type == defines.gui_type.entity 
-            and event.entity.name == "ss-spidertron-dock" then
-        update_dock_gui_for_player(
-            game.get_player(event.player_index),
-            event.entity
-        )
-    end
-end)
 
 -- We can move docks with picker dollies, regardless
 -- of if it contains a spider or not. All we really
@@ -526,13 +537,13 @@ function update_dock_gui_for_player(player, dock)
     if not dock_data.occupied then return end
 
     -- Decide if we should rebuild. We will only build
-    -- if the player is currently looking at this dock
-    if player.opened and (player.opened == dock) then
+    -- if the player is currently looking at this docked spider
+    if player.opened and (player.opened == dock_data.docked_spider) then
         -- Build a new gui!
 
         -- Build starting frame
         local anchor = {
-            gui=defines.relative_gui_type.accumulator_gui, 
+            gui=defines.defines.relative_gui_type.spider_vehicle_gui.accumulator_gui, 
             position=defines.relative_gui_position.right
         }
         local frame = player.gui.relative.add{
@@ -559,7 +570,8 @@ script.on_event(defines.events.on_gui_opened, function(event)
     local entity = event.entity
     if not entity then return end
     if event.gui_type == defines.gui_type.entity 
-            and entity.name == "ss-spidertron-dock" then
+            and entity.type == "spider-vehicle"
+            and string.match(entity.name, "ss[-]docked[-]") then
         update_dock_gui_for_player(
             game.get_player(event.player_index),
             event.entity

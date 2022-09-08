@@ -209,16 +209,6 @@ function attempt_docked_spider(spider)
     docked_spider.height = 0.35 -- To place spider on top of dock
     docked_spider.selection_box = {{-1, -1}, {1, 0.5}}
     docked_spider.collision_box = nil
-
-    -- Spider cannot walk, and therefore doesn't need power source
-    -- We will have to keep track of docked energy sources
-    docked_spider.energy_source = { type = "void" }
-    
-    -- Spider cannot fire at anything while docked.
-    -- We will have to keep track of docked-guns
-    -- docked_spider.guns = {}
-
-    -- Should not show on minimap while docked
     docked_spider.minimap_representation = nil
     docked_spider.selected_minimap_representation = nil
 
