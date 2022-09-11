@@ -33,13 +33,8 @@ function get_dock_data_from_entity(dock)
     return dock_data
 end
 
-function get_dock_data_from_unit_number(dock_unit_number)
-    local dock_data = global.docks[dock_unit_number]
-    if not dock_data then
-        global.docks[dock_unit_number] = create_dock_data(dock)
-        dock_data = global.docks[dock_unit_number]
-    end
-    return dock_data
+function get_spider_data_from_unit_number(spider_unit_number)
+    return global.spiders[spider_unit_number]
 end
 
 function create_spider_data(spider_entity)
@@ -67,6 +62,12 @@ function create_spider_data(spider_entity)
         -- If the dock is occupied then it will still return
         -- but simply fail to dock
         last_used_dock = nil,
+        
+        -- This field will only be true if this spider is
+        -- the docked variant. It contains the actual
+        -- spider name that is docked.
+        original_spider_name = nil,
+
     }
 end
 
@@ -217,16 +218,19 @@ function dock_spider(dock, spider)
         force = spider.force,
         raise_built = false, -- Because it's not a real spider
     }
+    docked_spider.destructible = false -- Only dock can be attacked
     local serialized_spider = spidertron_lib.serialise_spidertron(spider)
-    -- TODO Carefully remove guns
     spidertron_lib.deserialise_spidertron(docked_spider, serialized_spider)
-    docked_spider.torso_orientation = 0.6 -- Similar to sprite orientation
+    docked_spider.torso_orientation = 0.6 -- Looks nice
+    local docked_spider_data = get_spider_data_from_entity(docked_spider)
+    docked_spider_data.original_spider_name = spider.name
+    docked_spider_data.armed_for = dock
     
     -- Remove
     spider.destroy{raise_destroy=true}  -- This will clean the spider data in the destroy event
     
     -- Keep some notes
-    dock_data.spider_name = serialized_spider.name
+    dock_data.spider_name = docked_spider_data.original_spider_name
     dock_data.occupied = true
     dock_data.docked_spider = docked_spider
 end
@@ -262,7 +266,8 @@ function undock_spider(dock, docked_spider)
     spider_data.last_used_dock = dock
 
     -- Clean up
-    docked_spider.destroy{raise_destroy=false}  -- False because it's not a real spider
+    global.spiders[docked_spider.unit_number] = nil -- Because no destroy event will be called
+    docked_spider.destroy{raise_destroy=false}      -- False because it's not a real spider
     pop_dock_sprites(dock_data)
 
     -- Take some notes
@@ -310,7 +315,7 @@ function attempt_dock(spider)
 
     -- Update GUI's for all players
     for _, player in pairs(game.players) do
-        update_dock_gui_for_player(player, dock)
+        update_spider_gui_for_player(player, dock)
     end
 end
 
@@ -352,7 +357,7 @@ function attempt_undock(dock_data, force)
 
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
-        update_dock_gui_for_player(player, dock)
+        update_spider_gui_for_player(player, dock)
     end
 end
 
@@ -443,7 +448,13 @@ function on_deconstructed(event)
             attempt_undock(get_dock_data_from_entity(entity), true)
             global.docks[entity.unit_number] = nil
         elseif entity.type == "spider-vehicle" then
-            global.spiders[entity.unit_number] = nil
+            if string.match(entity.name, "ss[-]docked[-]") then
+                local spider_data = get_spider_data_from_entity(entity)
+                local dock_data = get_dock_data_from_entity(spider_data.armed_for)
+                attempt_undock(dock_data, true)
+            else
+                global.spiders[entity.unit_number] = nil
+            end
         end
     end
 end
@@ -509,51 +520,53 @@ script.on_event(defines.events.on_entity_cloned , function(event)
 
             -- Update all guis
             for _, player in pairs(game.players) do
-                update_dock_gui_for_player(player, source)
-                update_dock_gui_for_player(player, destination)
+                update_spider_gui_for_player(player, source)
+                update_spider_gui_for_player(player, destination)
             end
         end
     end
 end)
 
-function update_dock_gui_for_player(player, dock)
-    -- Get dock data
-    local dock_data = get_dock_data_from_entity(dock)
+function update_spider_gui_for_player(player, spider)
+    -- Get data
+    local spider_data = get_spider_data_from_entity(spider)
 
     -- Destroy whatever is there currently for
     -- any player. That's so that the player doesn't
     -- look at an outdated GUI
     for _, child in pairs(player.gui.relative.children) do
-        if child.name == "ss-spidertron-dock" then
+        if child.name == "ss-docked-spider" then
             -- We destroy all GUIs, not only for this unit-number,
             -- because otherwise they will open for other entities
             child.destroy() 
         end
     end
 
-    -- All docks have their GUIs destroyed for this player
-    -- If this dock is not occupied then we don't need
-    -- to redraw anything
-    if not dock_data.occupied then return end
+    -- All spiders have their GUIs destroyed for this player
+    -- If this spider is not a docked version then return
+    
+    if not string.match(spider.name, "ss[-]docked[-]") then return end
 
     -- Decide if we should rebuild. We will only build
     -- if the player is currently looking at this docked spider
-    if player.opened and (player.opened == dock_data.docked_spider) then
+    if player.opened 
+            and (player.opened == spider) 
+            and spider_data.armed_for.valid then
         -- Build a new gui!
 
         -- Build starting frame
         local anchor = {
-            gui=defines.defines.relative_gui_type.spider_vehicle_gui.accumulator_gui, 
+            gui=defines.relative_gui_type.spider_vehicle_gui, 
             position=defines.relative_gui_position.right
         }
         local frame = player.gui.relative.add{
-            name="ss-spidertron-dock", 
+            name="ss-docked-spider", 
             type="frame", 
             anchor=anchor,
 
             -- The tag associates the GUI with this
             -- specific dock 
-            tags = {dock_unit_number = dock.unit_number}
+            tags = {spider_unit_number = spider.unit_number}
         }
 
         -- Add button
@@ -570,9 +583,8 @@ script.on_event(defines.events.on_gui_opened, function(event)
     local entity = event.entity
     if not entity then return end
     if event.gui_type == defines.gui_type.entity 
-            and entity.type == "spider-vehicle"
-            and string.match(entity.name, "ss[-]docked[-]") then
-        update_dock_gui_for_player(
+            and entity.type == "spider-vehicle" then
+        update_spider_gui_for_player(
             game.get_player(event.player_index),
             event.entity
         )
@@ -582,8 +594,12 @@ end)
 script.on_event(defines.events.on_gui_click, function(event)
     local element = event.element
     if element.name == "spidertron-undock-button" then
-        attempt_undock(get_dock_data_from_unit_number(
-                element.parent.tags.dock_unit_number))
+        local spider_data = get_spider_data_from_unit_number(
+            element.parent.tags.spider_unit_number)
+        if not spider_data then return end
+        if not spider_data.armed_for.valid then return end
+        local dock_data = get_dock_data_from_entity(spider_data.armed_for)
+        attempt_undock(dock_data)
     end
 end)
 
