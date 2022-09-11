@@ -194,7 +194,6 @@ function attempt_docked_spider(spider)
     -- Some basic checks
     if not spider.minable then return end
 
-
     -- Create the sprites we will use. If it failed then we assume
     -- the spider is not dockable
     if not create_docked_spider_sprite(spider) then return false end

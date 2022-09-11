@@ -24,19 +24,6 @@ function create_dock_data(dock_entity)
     }
 end
 
-function get_dock_data_from_entity(dock)
-    local dock_data = global.docks[dock.unit_number]
-    if not dock_data then
-        global.docks[dock.unit_number] = create_dock_data(dock)
-        dock_data = global.docks[dock.unit_number]
-    end
-    return dock_data
-end
-
-function get_spider_data_from_unit_number(spider_unit_number)
-    return global.spiders[spider_unit_number]
-end
-
 function create_spider_data(spider_entity)
     return {
         -- A spider will only attempt to dock
@@ -71,7 +58,22 @@ function create_spider_data(spider_entity)
     }
 end
 
+function get_dock_data_from_entity(dock)
+    if not dock.name == "ss-spidertron-dock" then return end
+    local dock_data = global.docks[dock.unit_number]
+    if not dock_data then
+        global.docks[dock.unit_number] = create_dock_data(dock)
+        dock_data = global.docks[dock.unit_number]
+    end
+    return dock_data
+end
+
+function get_spider_data_from_unit_number(spider_unit_number)
+    return global.spiders[spider_unit_number]
+end
+
 function get_spider_data_from_entity(spider)
+    if not spider.type == "spider-vehicle" then return end
     local spider_data = global.spiders[spider.unit_number]
     if not spider_data then
         global.spiders[spider.unit_number] = create_spider_data(spider)
@@ -148,8 +150,6 @@ end
 -- was not allowed. It will play the "no-no"
 -- sound and create some flying text
 function dock_error(dock, text)
-    -- TODO A future GUI should display the error message.
-    -- because the flying text is obscure
     dock.surface.play_sound{
         path="ss-no-no", 
         position=dock.position
@@ -173,10 +173,7 @@ end
 function dock_does_not_support_spider(dock, spider_name)
     
     -- Is this spider type supported in the first place?
-    -- We check this by looking if a sprite for this spider exists
-    -- as a bridge between the data and control stage. If it doesn't
-    -- exist then this spider can never dock
-    if not game.is_valid_sprite_path("ss-docked-"..spider_name.."-main") then
+    if not global.spider_whitelist[spider_name] then
         return {"space-spidertron-dock.spider-not-supported"}
     end
 
@@ -233,6 +230,8 @@ function dock_spider(dock, spider)
     dock_data.spider_name = docked_spider_data.original_spider_name
     dock_data.occupied = true
     dock_data.docked_spider = docked_spider
+
+    return docked_spider
 end
 
 -- This will undock a spider, and not
@@ -274,6 +273,8 @@ function undock_spider(dock, docked_spider)
     dock_data.docked_spider = nil
     dock_data.occupied = false
     dock_data.serialized_spider = nil
+
+    return spider
 end
 
 -- This function will attempt the dock
@@ -311,12 +312,14 @@ function attempt_dock(spider)
     end
 
     -- Dock the spider!
-    dock_spider(dock, spider)
+    local docked_spider = dock_spider(dock, spider)
 
     -- Update GUI's for all players
     for _, player in pairs(game.players) do
         update_spider_gui_for_player(player, dock)
     end
+
+    return docked_spider
 end
 
 function attempt_undock(dock_data, force)
@@ -353,12 +356,14 @@ function attempt_undock(dock_data, force)
     end
 
     -- Undock the spider!
-    undock_spider(dock, dock_data.docked_spider)    
+    local undocked_spider = undock_spider(dock, dock_data.docked_spider)    
 
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
         update_spider_gui_for_player(player, dock)
     end
+
+    return undocked_spider
 end
 
 script.on_event(defines.events.on_spider_command_completed, 
@@ -469,18 +474,15 @@ script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 -- have to do is redraw the sprites, because the dock
 -- entity remains the same entity. It's only moved.
 function picker_dollies_move_event(event)
-    local dock = event_moved_entity
-    if not dock or dock.valid then return end
-    local dock_data = get_dock_data_from_entity(dock)
-
-    -- If there's a spider, then update the sprites
-    if dock_data.occupied then
-        pop_dock_sprites(dock_data)
-        draw_docked_spider(
-            dock_data, 
-            dock_data.serialized_spider.name,
-            dock_data.serialized_spider.color
-        )
+    local entity = event.moved_entity
+    if entity.name == "ss-spidertron-dock" then
+        local dock_data = get_dock_data_from_entity(entity)
+        if dock_data.occupied then
+            dock_data.docked_spider.teleport({
+                entity.position.x,
+                entity.position.y + 0.01 -- To draw spidertron over dock entity
+            }, entity.surface)
+        end
     end
 end
 
@@ -489,40 +491,46 @@ end
 -- the sprites.
 -- Technically this can be called under different circumstances too
 -- but we will assume the spider always need to move to the
--- new locationpotential_dock
+-- new location
 script.on_event(defines.events.on_entity_cloned , function(event)
     local source = event.source
     local destination = event.destination
     if source and source.valid and destination and destination.valid then
+        -- We will undock and redock the spider to not have to duplicate
+        -- code. We will only do it relative to the dock, and delete the
+        -- cloned spider. That way we have full control of what's happening
         if source.name == "ss-spidertron-dock" then
             local source_dock_data = get_dock_data_from_entity(source)
-
-            -- If there's nothing docked at the source then we
-            -- don't have to do anything
-            if not source_dock_data.occupied then return end
-            
-            -- Move spider to new location
-            destination_dock_data = util.copy(source_dock_data)
-            destination_dock_data.dock_entity = destination
-            destination_dock_data.docked_sprites = {}
-            draw_docked_spider(
-                destination_dock_data, 
-                destination_dock_data.serialized_spider.name,
-                destination_dock_data.serialized_spider.color
-            )
-            global.docks[destination.unit_number] = destination_dock_data
-
-            -- Remove from old location
-            for _, sprite in pairs(source_dock_data.docked_sprites) do
-                rendering.destroy(sprite)
+            if source_dock_data.occupied then
+                -- Move the spider digitally to the new dock
+                local docked_spider = source_dock_data.docked_spider
+                local spider_data = get_spider_data_from_entity(docked_spider)
+                local destination_dock_data = get_dock_data_from_entity(destination)
+                if destination_dock_data.occupied then return end -- Shouldn't happen
+                
+                -- Move spider entity
+                docked_spider.teleport({
+                    destination.position.x,
+                    destination.position.y + 0.01 -- To draw spidertron over dock entity
+                }, destination.surface)
+                
+                -- First transfer all saved data. And then remove what we don't need
+                -- Doing this funky transfer to also include whatever new fields we might add
+                local key_blacklist = {
+                    ["docked_sprites"]=true, 
+                    ["dock_entity"]=true, 
+                    ["dock_unit_number"]=true}
+                for key, value in pairs(source_dock_data) do
+                    if not key_blacklist[key] then
+                        destination_dock_data[key] = value
+                    end
+                end
+                global.docks[source.unit_number] = nil -- Reset old dock
             end
-            global.docks[source.unit_number] = nil
-
-            -- Update all guis
-            for _, player in pairs(game.players) do
-                update_spider_gui_for_player(player, source)
-                update_spider_gui_for_player(player, destination)
-            end
+        elseif string.match(source.name, "ss[-]docked[-]") then
+            -- Destroy cloned docked spiders. We create them ourselves
+            -- The data will be destroyed with the dock transfer
+            destination.destroy{raise_destroy=false}
         end
     end
 end)
@@ -626,13 +634,38 @@ function redraw_all_docks()
     end
 end
 
+function build_spider_whitelist()
+    local whitelist = {}
+    local spiders = game.get_filtered_entity_prototypes({{filter="type", type="spider-vehicle"}})
+    for _, spider in pairs(spiders) do
+        local original_spider_name = string.match(spider.name, "ss[-]docked[-](.*)")
+        if original_spider_name and spiders[original_spider_name] then
+            whitelist[original_spider_name] = true
+        end
+    end
+    return whitelist
+end
+
+function picker_dollies_blacklist_docked_spiders()
+    if remote.interfaces["PickerDollies"] and remote.interfaces["PickerDollies"]["add_blacklist_name"] then
+        local spiders = game.get_filtered_entity_prototypes({{filter="type", type="spider-vehicle"}})
+        for _, spider in pairs(spiders) do
+            if string.match(spider.name, "ss[-]docked[-]") then
+                remote.call("PickerDollies", "add_blacklist_name",  spider.name)
+            end
+        end
+    end
+end
+
 script.on_init(function()
     global.docks = {}
     global.spiders = {}
-
+    global.spider_whitelist = build_spider_whitelist()
+    picker_dollies_blacklist_docked_spiders()
+    
     -- Add support for picker dollies
     if remote.interfaces["PickerDollies"] 
-        and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+    and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
         script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), picker_dollies_move_event)
     end
 end)
@@ -648,8 +681,10 @@ end)
 script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
     global.spiders = global.spiders or {}
+    global.spider_whitelist = build_spider_whitelist()
 
     redraw_all_docks()
+    picker_dollies_blacklist_docked_spiders()
 
     -- Fix technologies
     local technology_unlocks_spidertron = false
