@@ -18,25 +18,7 @@
 ]]
 
 local util = require("__core__/lualib/util")
-
-
--- Hardcoded blacklist. Can possibly make this more dynamic in the future
-local SPIDER_BLACK_LIST = {
-    -- Space Exploration
-    ["se-burbulator"] = true,
-
-    -- Companions
-    ["companion"] = true,
-
-    -- Combat Robots Overhaul
-    ["defender-unit"] = true,
-    ["destroyer-unit"] = true,
-
-    -- Lex's Aircraft
-    ["lex-flying-cargo"] = true,
-    ["lex-flying-gunship"] = true,
-    ["lex-flying-heavyship"] = true,
-}
+local SPIDER_BLACK_LIST = require("registry").spider_black_list
 
 -- This function will dictate if a spider is
 -- dockable or not. If we can build a sprite
