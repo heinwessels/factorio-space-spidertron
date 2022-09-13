@@ -28,9 +28,14 @@ local SPIDER_BLACK_LIST = {
     -- Companions
     ["companion"] = true,
 
-    -- Combat Mechanics Overhaul
+    -- Combat Robots Overhaul
     ["defender-unit"] = true,
     ["destroyer-unit"] = true,
+
+    -- Lex's Aircraft
+    ["lex-flying-cargo"] = true,
+    ["lex-flying-gunship"] = true,
+    ["lex-flying-heavyship"] = true,
 }
 
 -- This function will dictate if a spider is
