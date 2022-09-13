@@ -5,6 +5,7 @@ Date: ??.??.2022
     - Space Spidertron now slowly hovers instead of bopping up and down. (Thanks Xorimuth!)
   Changes:
     - Prevent Lex's Aircraft from being dockable.
+    - Space Spidertron recipe now has more realistic ingredients.
   Bugfixes:
     - [SE] No longer changes all spider collision masks regardless of if it's blacklisted.
 ---------------------------------------------------------------------------------------------------
