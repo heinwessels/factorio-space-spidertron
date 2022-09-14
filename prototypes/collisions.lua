@@ -1,7 +1,22 @@
--- We change space-spider to be able to walk
--- in space, and disable regular spider to walk
--- in space by default
+-----------------------------------------------------------------
+--  Add a collision between Space Spidertron and `out-of-map` tiles
+-----------------------------------------------------------------
+local collision_mask_util = require("__core__.lualib.collision-mask-util")
+local out_of_map_layer = collision_mask_util.get_first_unused_layer()
+if out_of_map_layer then
+    local space_spidertron_leg = data.raw["spider-leg"]["ss-space-spidertron-leg"]
+    space_spidertron_leg.collision_mask = {out_of_map_layer}
+    space_spidertron_leg.collision_box = {{-0.1, -0.1}, {0.1, 0.1}} -- Can't be zero
 
+    local out_of_map_tile = data.raw["tile"]["out-of-map"]
+    local out_of_map_tile_mask = collision_mask_util.get_mask(out_of_map_tile)
+    table.insert(out_of_map_tile_mask, out_of_map_layer)
+    out_of_map_tile.collision_mask = out_of_map_tile_mask 
+end
+
+-----------------------------------------------------------------
+--  Disable other spiders from walking on spaceships and in space
+-----------------------------------------------------------------
 if not mods["space-exploration"] then return end
 if settings.startup["space-spidertron-allow-other-spiders-in-space"].value then return end
 

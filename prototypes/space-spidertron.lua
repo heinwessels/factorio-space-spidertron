@@ -116,7 +116,7 @@ local spider = {
     legs =
     {
       { -- 1
-        leg = "space-spidertron-leg",
+        leg = "ss-space-spidertron-leg",
         mount_position = {0, -1},
         ground_position = {0, -1},
         blocking_legs = {1},
@@ -228,12 +228,11 @@ end
 
 local spider_leg = {
     type = "spider-leg",
-    name = "space-spidertron-leg",
+    name = "ss-space-spidertron-leg",
 
     localised_name = {"entity-name.spidertron-leg"},
-    collision_box = nil,
-    collision_mask = {},
-    selection_box = {{-0, -0}, {0, 0}},
+    collision_box = {{-0.05, -0.05}, {0.05, 0.05}},
+    selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
     icon = "__base__/graphics/icons/spidertron.png",
     icon_size = 64, icon_mipmaps = 4,
     walking_sound_volume_modifier = 0,
