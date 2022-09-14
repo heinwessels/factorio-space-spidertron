@@ -1,5 +1,9 @@
 -----------------------------------------------------------------
---  Add a collision between Space Spidertron and `out-of-map` tiles
+-- Add a collision between Space Spidertron and `out-of-map` tiles
+-- Note:
+-- 'out-of-map' also works for original Factorissimo2, because the
+-- `out-of-factory` tiles factory-edge is only a few tiles wide, then
+-- it turns into `out-of-map`. So all good.
 -----------------------------------------------------------------
 local collision_mask_util = require("__core__.lualib.collision-mask-util")
 local out_of_map_layer = collision_mask_util.get_first_unused_layer()
@@ -20,7 +24,7 @@ end
 if not mods["space-exploration"] then return end
 if settings.startup["space-spidertron-allow-other-spiders-in-space"].value then return end
 
-local SPIDER_BLACK_LIST = require("registry").spider_black_list
+local registry = require("registry")
 
 -- Let's use SE's nice tools
 local collision_mask_util_extended 
@@ -31,7 +35,9 @@ local space_layer =
         collision_mask_util_extended.get_make_named_collision_mask("space-tile")
 
 for _, spider in pairs(data.raw["spider-vehicle"]) do
-    if spider.name ~= "ss-space-spidertron" and not SPIDER_BLACK_LIST[spider.name] then 
+    if spider.name ~= "ss-space-spidertron" 
+            and not registry.blacklisted_for_collision(spider.name)
+            and not spider.se_allow_in_space then 
         spider.collision_mask = spider.collision_mask or {}
         collision_mask_util_extended.add_layer(spider.collision_mask, space_layer)
         

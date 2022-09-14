@@ -6,6 +6,7 @@ Date: ??.??.2022
   Changes:
     - Prevent Lex's Aircraft from being dockable.
     - Space Spidertron recipe now has more realistic ingredients.
+    - Less harsh checks on which spiders are allowed to dock.
   Bugfixes:
     - [SE] No longer changes all spider collision masks regardless of if it's blacklisted.
     - Space Spidertron can no longer travel far into `out-of-map` tiles. (Thanks Soggs!)

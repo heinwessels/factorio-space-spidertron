@@ -18,7 +18,7 @@
 ]]
 
 local util = require("__core__/lualib/util")
-local SPIDER_BLACK_LIST = require("registry").spider_black_list
+local SPIDER_BLACK_LIST = require("registry").black_list
 
 -- This function will dictate if a spider is
 -- dockable or not. If we can build a sprite
