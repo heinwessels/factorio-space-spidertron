@@ -3,6 +3,7 @@ Version: 0.3.0
 Date: ??.??.2022
   Features:
     - Space Spidertron now slowly hovers instead of bopping up and down. (Thanks Xorimuth!)
+    - Space Spidertron now hides in a menu-simulation.
   Changes:
     - Prevent Lex's Aircraft from being dockable.
     - Space Spidertron recipe now has more realistic ingredients.
