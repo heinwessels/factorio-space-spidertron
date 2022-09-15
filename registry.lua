@@ -23,9 +23,12 @@ registry.black_list = {
 registry.collision_black_list = {
     
     -- Constructron-Continued
+    -- Currently has a bug: 
+    --      https://mods.factorio.com/mod/Constructron-Continued/discussion/63235ca9e9ae1ae0a816d9ea
     -- These are already setup as the author desires
-    ["constructron"] = true,
-    ["constructron-rocket-powered"] = true
+    -- The regular version should have collisions added, as per normal
+    -- The rocket version will always exist because we set it to true
+    ["constructron-rocket-powered"] = true  -- This one is setup for space already
 }
 
 function registry.blacklisted_for_collision(spider_name)
