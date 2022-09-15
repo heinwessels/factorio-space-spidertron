@@ -457,6 +457,8 @@ end)
 function picker_dollies_move_event(event)
     local dock = event_moved_entity
     if not dock or dock.valid then return end
+    if dock.name ~= "ss-spidertron-dock" then return end
+    
     local dock_data = get_dock_data_from_entity(dock)
 
     -- If there's a spider, then update the sprites
