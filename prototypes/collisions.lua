@@ -22,7 +22,6 @@ end
 --  Disable other spiders from walking on spaceships and in space
 -----------------------------------------------------------------
 if not mods["space-exploration"] then return end
-if settings.startup["space-spidertron-allow-other-spiders-in-space"].value then return end
 
 local registry = require("registry")
 
@@ -30,6 +29,9 @@ local registry = require("registry")
 local collision_mask_util_extended 
         = require("__space-exploration__/collision-mask-util-extended/data/collision-mask-util-extended")
 local data_util = require("__space-exploration__/data_util")
+
+-- Make sure we care about collision masks
+if settings.startup["space-spidertron-allow-other-spiders-in-space"].value then return end
 
 local space_layer = 
         collision_mask_util_extended.get_make_named_collision_mask("space-tile")

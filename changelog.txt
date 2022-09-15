@@ -12,6 +12,7 @@ Date: ??.??.2022
     - [SE] No longer changes all spider collision masks regardless of if it's blacklisted.
     - Space Spidertron can no longer travel far into `out-of-map` tiles. (Thanks Soggs!)
     - Fix catching too many things in Picker Dolly events.
+    - Fix a possible CRC issue.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.5
 Date: 19.08.2022
