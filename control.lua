@@ -232,7 +232,11 @@ function dock_does_not_support_spider(dock, spider)
             -- So lets create a temporary one
             -- TODO This is so ugly, we need a better way!
             local temporary_spider = dock.surface.create_entity{
-                name=spider_name, position=dock.position}
+                name=spider_name, 
+                position=dock.position,
+                create_build_effect_smoke=false,
+                raise_built=false,
+            }
             leg_collision_mask = util.table.deepcopy(
                 temporary_spider.get_spider_legs()[1].prototype.collision_mask)
             temporary_spider.destroy() -- Destroy it after looking at it's leg!
