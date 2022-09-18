@@ -43,7 +43,7 @@ local spider = {
   weight = 1,
   braking_force = 1,
   friction_force = 1,
-  torso_bob_speed = 0.05,
+  torso_bob_speed = 0.2,
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
   collision_mask = {},
   minable = {result = "ss-space-spidertron", mining_time = 1},
