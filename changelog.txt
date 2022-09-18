@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: ??.09.2022
+  Features:
+    - Space Spidertron now hides in another menu-simulation.
   Changes:
     - Space Spidertron recipe now uses Aeroframe Poles instead of Beryllium Plate. 
     - Less harsh compatability with Constructron Continued.
