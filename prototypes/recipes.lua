@@ -42,9 +42,9 @@ else
 end
 
 if mods["space-exploration"] then
-    -- Move to Beryl tech. TODO Use 'Aeroframe Pole' maybe, but then we need an extra tech
+    -- Move to Beryl tech. TODO Add custom tech?
     remove_ingredient(spider_ingredients, "se-heavy-girder")
-    table.insert(spider_ingredients, {"se-beryllium-plate", 50})
+    table.insert(spider_ingredients, {"se-aeroframe-pole", 16})
     
     -- The life needs to survice in space somehow
     table.insert(spider_ingredients, {"se-lifesupport-canister", 5})
