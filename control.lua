@@ -644,8 +644,7 @@ script.on_configuration_changed(function (event)
     global.docks = global.docks or {}
     global.spiders = global.spiders or {}
     global.spider_whitelist = build_spider_whitelist()
-
-    redraw_all_docks()
+    
     picker_dollies_blacklist_docked_spiders()
 
     -- Fix technologies

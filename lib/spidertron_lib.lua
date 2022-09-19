@@ -322,12 +322,13 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
   end
 
   -- Reconnect remotes
+  --[[(HW) Removing check for corrected entities because we create the new one before deleting the old one]]
   local connected_remotes = serialised_data.connected_remotes
   if connected_remotes then
     if data_version >= 2 then
       local moved_remotes = {}
       for item_number, remote_stack in pairs(connected_remotes) do
-        if remote_stack and remote_stack.valid_for_read and remote_stack.item_number == item_number and not remote_stack.connected_entity then
+        if remote_stack and remote_stack.valid_for_read and remote_stack.item_number == item_number --[[ and not remote_stack.connected_entity]] then
           remote_stack.connected_entity = spidertron
         else
           table.insert(moved_remotes, item_number)
@@ -340,7 +341,7 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
         find_remotes(nil, unconnected_remotes)
         for _, moved_remote_item_number in pairs(moved_remotes) do
           local remote = unconnected_remotes[moved_remote_item_number]
-          if remote and remote.valid_for_read and not remote.connected_entity then
+          if remote and remote.valid_for_read --[[and not remote.connected_entity]] then
             -- Remote has been found
             remote.connected_entity = spidertron
           end
@@ -350,7 +351,7 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
     else
       -- Legacy
       for _, remote in pairs(connected_remotes) do
-        if remote and remote.valid_for_read and remote.type == "spidertron-remote" and not remote.connected_entity then
+        if remote and remote.valid_for_read and remote.type == "spidertron-remote" --[[and not remote.connected_entity]] then
           remote.connected_entity = spidertron
         end
       end
