@@ -43,6 +43,7 @@ local spider = {
   weight = 1,
   braking_force = 1,
   friction_force = 1,
+  torso_bob_speed = 0.2,
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
   collision_mask = {},
   minable = {result = "ss-space-spidertron", mining_time = 1},
@@ -99,7 +100,7 @@ local spider = {
   equipment_grid = "spidertron-equipment-grid",
   trash_inventory_size = 20,
   height = 1.5,
-  torso_rotation_speed = 0.02,
+  torso_rotation_speed = 0.2,
   chunk_exploration_radius = 3,
   selection_priority = 51,
   graphics_set = spidertron_torso_graphics_set(1),
@@ -115,7 +116,7 @@ local spider = {
     legs =
     {
       { -- 1
-        leg = "space-spidertron-leg",
+        leg = "ss-space-spidertron-leg",
         mount_position = {0, -1},
         ground_position = {0, -1},
         blocking_legs = {1},
@@ -227,19 +228,18 @@ end
 
 local spider_leg = {
     type = "spider-leg",
-    name = "space-spidertron-leg",
+    name = "ss-space-spidertron-leg",
 
     localised_name = {"entity-name.spidertron-leg"},
-    collision_box = nil,
-    collision_mask = {},
-    selection_box = {{-0, -0}, {0, 0}},
+    collision_box = {{-0.05, -0.05}, {0.05, 0.05}},
+    selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
     icon = "__base__/graphics/icons/spidertron.png",
     icon_size = 64, icon_mipmaps = 4,
     walking_sound_volume_modifier = 0,
     target_position_randomisation_distance = 0,
     minimal_step_size = 0,
     working_sound = nil,
-    part_length = 1000000000,
+    part_length = 5,
     initial_movement_speed = 100,
     movement_acceleration = 100,
     max_health = 100,

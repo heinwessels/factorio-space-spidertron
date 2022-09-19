@@ -1,4 +1,30 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 18.09.2022
+  Features:
+    - Space Spidertron now hides in another menu-simulation.
+  Changes:
+    - Space Spidertron recipe now uses Aeroframe Poles instead of Beryllium Plate. 
+    - Less harsh compatability with Constructron Continued.
+  Bugfixes:
+    - Remove build-smoke during failed undocking attempt.
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 15.09.2022
+  Features:
+    - Space Spidertron now slowly hovers instead of bopping up and down. (Thanks Xorimuth!)
+    - Space Spidertron now hides in a menu-simulation.
+  Changes:
+    - Prevent Lex's Aircraft from being dockable.
+    - Space Spidertron recipe now has more realistic ingredients.
+    - Less harsh checks on which spiders are allowed to dock.
+    - Compatability with Constructron-Continued.
+  Bugfixes:
+    - [SE] No longer changes all spider collision masks regardless of if it's blacklisted.
+    - Space Spidertron can no longer travel far into `out-of-map` tiles. (Thanks Soggs!)
+    - Fix catching too many things in Picker Dolly events.
+    - Fix a possible CRC issue.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.5
 Date: 19.08.2022
   Changes:

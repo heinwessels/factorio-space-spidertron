@@ -162,6 +162,31 @@ function dock_error(dock, text)
     }
 end
 
+-- Based on the tool provided by Wube, but that tool
+-- does not function during runtime, so I need to redo it
+local function collision_masks_collide(mask_1, mask_2)
+
+    local clear_flags = function(map)
+        for k, flag in pairs ({
+            "consider-tile-transitions",
+            "not-colliding-with-itself",
+            "colliding-with-tiles-only"
+          }) do
+            map[flag] = nil
+        end
+    end
+
+    clear_flags(mask_1)
+    clear_flags(mask_2)
+  
+    for layer, _ in pairs (mask_2) do
+      if mask_1[layer] then
+        return true
+      end
+    end
+    return false
+end
+
 -- Sometimes a dock will not support a specific
 -- spider type. Currently this only happens
 -- when a normal spider tries to dock to a dock
@@ -170,25 +195,57 @@ end
 -- can reach the dock without stepping on restricted
 -- spaceship tiles
 -- Will return the text to display if there is no support
-function dock_does_not_support_spider(dock, spider_name)
+function dock_does_not_support_spider(dock, spider)
+
+    -- Hacky implementation where spider can be
+    -- either the entity or the name of the entity.
+    -- So unpack it so we know how to handle it
+    local spider_name = nil
+    if type(spider) ~= "string" then
+        -- It's the entity
+        spider_name = spider.name
+    else
+        -- We just got a spider name. Lame!
+        spider_name = spider
+        spider = nil
+    end
     
     -- Is this spider type supported in the first place?
     if not global.spider_whitelist[spider_name] then
         return {"space-spidertron-dock.spider-not-supported"}
     end
 
-    -- Is the dock on a tile that does not allow regular spiders to dock?
-    if not settings.startup["space-spidertron-allow-other-spiders-in-space"].value then
-        -- Space spidertron is always allowed
-        if spider_name ~= "ss-space-spidertron" then
-            -- Check if the dock is on a spaceship tile
-            -- This is not a full-proof check, as we check only one tile under the dock
-            -- and there are 4 that can potentially be a spaceship tile. However, in that
-            -- case the ship can't launch due to it's mechanics. And if the player really
-            -- wants to he can hack the system, so this check is good enough.
-            if dock.surface.get_tile(dock.position).name == "se-spaceship-floor" then
-                return {"space-spidertron-dock.spider-not-supported-on-tile"}
-            end
+    -- Can the spider dock on this tile? This is to prevent terrestrial spiders
+    -- being able to dock to a spaceship they can't walk on because the body
+    -- can still reach the dock. We do this by checking if the first leg collides
+    -- with a tile underneath the dock
+    if game.active_mods["space-exploration"]
+            and not settings.startup["space-spidertron-allow-other-spiders-in-space"].value then
+        -- Only do it if we care about it though
+
+        local tile_collision_mask = dock.surface.get_tile(dock.position).prototype.collision_mask
+        local leg_collision_mask = nil
+        if spider then
+            leg_collision_mask = util.table.deepcopy(
+                spider.get_spider_legs()[1].prototype.collision_mask)
+        else
+            -- We don't have a valid spider to get the leg-name from. 
+            -- So lets create a temporary one
+            -- TODO This is so ugly, we need a better way!
+            local temporary_spider = dock.surface.create_entity{
+                name=spider_name, 
+                position=dock.position,
+                create_build_effect_smoke=false,
+                raise_built=false,
+            }
+            leg_collision_mask = util.table.deepcopy(
+                temporary_spider.get_spider_legs()[1].prototype.collision_mask)
+            temporary_spider.destroy() -- Destroy it after looking at it's leg!
+        end
+
+        -- If the leg would collide with the tile then it's not supported
+        if collision_masks_collide(tile_collision_mask, leg_collision_mask) then
+            return {"space-spidertron-dock.spider-not-supported-on-tile"}
         end
     end
 end
@@ -305,7 +362,7 @@ function attempt_dock(spider)
     if dock_data.occupied then return end
 
     -- Check if this spider is allowed to dock here
-    local error_msg = dock_does_not_support_spider(dock, spider.name)
+    local error_msg = dock_does_not_support_spider(dock, spider)
     if error_msg then
         dock_error(dock, error_msg)
         return
