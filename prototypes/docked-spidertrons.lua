@@ -16,17 +16,7 @@
 
 local util = require("__core__/lualib/util")
 
-local spider_black_list = {
-    -- Space Exploration
-    ["se-burbulator"] = true,
-
-    -- Companions
-    ["companion"] = true,
-
-    -- Combat Robots Overhaul
-    ["defender-unit"] = true,
-    ["destroyer-unit"] = true,
-}
+local spider_black_list = require("registry").black_list
 
 -- An unmovable leg that will be used for all
 -- docked spidertrons
@@ -51,136 +41,6 @@ data:extend{{
     graphics_set = create_spidertron_leg_graphics_set(0, 1)
 }}
 
--- We will create a custom sprite to place when then
--- spider is docked. Using the regular spider sprites
--- will draw them on top of everything, which is not
--- what we want. 
-function create_docked_spider_sprite(spider)
-    local main_layers = {}
-    local shadow_layers = {}
-    local tint_layers = {}
-
-    -- Try to build the sprite. We will only care about
-    --  Base: The stationary frame at the bottom
-    --      Here will will remove any potential layers with the
-    --      word "flame" in the file name. Flames will burn the dock
-    --  Animation: The part that turns
-    --  Shadow: It's shadow
-    --      Only here will we not expect layers
-    --      What if it is though? FAIL!
-
-    -- Using these sprites we will build our own three sprites
-    -- that we layer during runtime. This will be:
-    --      Main: The body, essentially a single rotation of the animation
-    --      Tint: Only the tinted layers to give the docked spider the correct colours
-    --      Shadow: Yup...
-
-    if not spider.minable then return end
-    
-    if not spider.graphics_set then return end
-    if not spider.graphics_set.base_animation then return end
-    if not spider.graphics_set.animation then return end
-    if not spider.graphics_set.shadow_animation then return end
-
-    local torso_bottom_layers = util.copy(spider.graphics_set.base_animation.layers)
-    local torso_body_layers = util.copy(spider.graphics_set.animation.layers)
-    local torso_body_shadow = util.copy(spider.graphics_set.shadow_animation)
-
-    if not torso_bottom_layers or not torso_body_layers or not torso_body_shadow then return end
-
-    -- AAI Programmable Vehicles compatability:
-    -- We don't display the AI version of the spider. Such spiders usually
-    -- end with "-rocket-1" or something. This is a silly check, but should
-    -- be good enough for now.
-    if string.match(spider.name, "-[0-9]+$") then return end
-
-    -- Sanitize and add the bottom layers
-    for index, layer in pairs(torso_bottom_layers) do
-        -- Actually, we don't want to draw the bottom.
-        -- The spider sits much more snugly if we don't
-        -- draw the bottom. Changing this requires 
-        -- changing where the sprite is drawn
-        break
-
-        -- Only use non-flame layers
-        -- Only looking at the bottom because that's likely where they will exist
-        if not layer.filename:find("flame") then
-            if layer.apply_runtime_tint then
-                table.insert(tint_layers, layer)
-            else
-                table.insert(main_layers, layer)
-            end
-        end
-    end
-
-    -- Sanitize the and add the body layer. 
-    for index, layer in pairs(torso_body_layers) do
-
-        -- Rudemental sanity check to see if this is a
-        -- normal-ish spidertron
-        if layer.direction_count ~= 64 then return end
-
-        -- The body layer contains animations for all rotations,
-        -- So change {x,y} to a nice looking one
-        -- TODO This can be smarter
-        layer.x = layer.width * 4
-        layer.y = layer.height * 4
-        layer.hr_version.x = layer.hr_version.width * 4
-        layer.hr_version.y = layer.hr_version.height * 4
-        
-        if layer.apply_runtime_tint then
-            table.insert(tint_layers, layer)
-        else
-        table.insert(main_layers, layer)
-        end
-    end
-
-    -- Sanitize the and add the shadow layers
-    -- NB: We're not building the "bottom" shadows,
-    -- because the bottom is not currently drawn
-    for index, layer in pairs({torso_body_shadow}) do
-
-        -- Rudemental sanity check to see if this is a
-        -- normal-ish spidertron
-        if layer.direction_count ~= 64 then return end
-
-        -- The body layer contains animations for all rotations,
-        -- So change {x,y} to a nice looking one
-        -- TODO This can be smarter
-        layer.x = layer.width * 4
-        layer.y = layer.height * 4
-        layer.hr_version.x = layer.hr_version.width * 4
-        layer.hr_version.y = layer.hr_version.height * 4
-        
-        table.insert(shadow_layers, layer)
-    end
-
-    if not next(shadow_layers) or not next(main_layers) or not next(tint_layers) then return end
-
-    -- Add the sprites
-    data:extend{
-        {
-            type = "sprite",
-            name = "ss-docked-"..spider.name.."-shadow",
-            layers = shadow_layers,
-            flags = {"shadow"},
-            draw_as_shadow = true,
-        },
-        {
-            type = "sprite",
-            name = "ss-docked-"..spider.name.."-main",
-            layers = main_layers,
-        },
-        {
-            type = "sprite",
-            name = "ss-docked-"..spider.name.."-tint",
-            layers = tint_layers,
-        },
-    }
-
-    return true
-end
-
 -- This function will dictate if a spider is
 -- dockable or not. If we can build a docked-spider
 -- for it to show during docking, then it's
@@ -193,10 +53,11 @@ function attempt_docked_spider(spider)
     
     -- Some basic checks
     if not spider.minable then return end
-
-    -- Create the sprites we will use. If it failed then we assume
-    -- the spider is not dockable
-    if not create_docked_spider_sprite(spider) then return false end
+    if not spider.minable then return end    
+    if not spider.graphics_set then return end
+    if not spider.graphics_set.base_animation then return end
+    if not spider.graphics_set.animation then return end
+    if not spider.graphics_set.shadow_animation then return end
 
     -- Good enough to start the construction attempt
     local docked_spider = util.copy(spider)
@@ -204,6 +65,7 @@ function attempt_docked_spider(spider)
     docked_spider.localised_name = {"space-spidertron-dock.docked-spider", spider.name}
     
     docked_spider.minable.mining_time = 1
+    docked_spider.torso_bob_speed = 0
     docked_spider.allow_passengers = false
     docked_spider.height = 0.35 -- To place spider on top of dock
     docked_spider.selection_box = {{-1, -1}, {1, 0.5}}
@@ -223,7 +85,42 @@ function attempt_docked_spider(spider)
     }
 
     -- Remove base layers TODO Replace with light layer
-    docked_spider.graphics_set.base_animation = util.empty_sprite(1)    -- Will also remove flames
+    docked_spider.graphics_set.base_animation = {layers={
+        -- Will also remove flames
+        {
+            filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+            blend_mode = "additive",
+            direction_count = 1,
+            draw_as_glow = true,    -- Draws a sprite and a light
+            width = 19,
+            height = 19,
+            shift = { -0.42, 0.5 },
+            scale = 0.4,
+            run_mode = "forward-then-backward",
+            frame_count = 16,
+            line_length = 8,
+            -- 3 second loop, meaning 16 frames per 180 ticks
+            animation_speed = 0.088, -- frames per tick
+
+            hr_version =
+            {
+                filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+                blend_mode = "additive",
+                direction_count = 1,
+                draw_as_glow = true,    -- Draws a sprite and a light
+                width = 19,
+                height = 19,
+                shift = { -0.42, 0.5 },
+                scale = 0.4,
+                run_mode = "forward-then-backward",
+                frame_count = 16,
+                line_length = 8,
+
+                -- 3 second loop, meaning 16 frames per 180 ticks
+                animation_speed = 0.088, -- frames per tick
+            }
+        }
+    }}
     docked_spider.graphics_set.shadow_base_animation = util.empty_sprite(1)
     -- Change render layer so it's not on top of everything
     docked_spider.graphics_set.render_layer = "object"
@@ -260,47 +157,3 @@ if not found_at_least_one then
     error("Could not find any spiders that can dock")
 end
 for _, docked_spider in pairs(docked_spiders) do data:extend{docked_spider} end
-
--- Create the docking light. Will have to be drawn on top
--- manually too.
-data:extend{
-    {
-        -- We declare it as an animation because that can
-        -- animate and have act as a light as well
-        type = "animation",
-        name = "ss-docked-light",
-        layers = {
-            {
-                filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
-                blend_mode = "additive",
-                draw_as_glow = true,    -- Draws a sprite and a light
-                width = 19,
-                height = 19,
-                shift = { -0.42, 0.5 },
-                scale = 0.4,
-                run_mode = "forward-then-backward",
-                frame_count = 16,
-                line_length = 8,
-                -- 3 second loop, meaning 16 frames per 180 ticks
-                animation_speed = 0.088, -- frames per tick
-
-                hr_version =
-                {
-                    filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
-                    blend_mode = "additive",
-                    draw_as_glow = true,    -- Draws a sprite and a light
-                    width = 19,
-                    height = 19,
-                    shift = { -0.42, 0.5 },
-                    scale = 0.4,
-                    run_mode = "forward-then-backward",
-                    frame_count = 16,
-                    line_length = 8,
-
-                    -- 3 second loop, meaning 16 frames per 180 ticks
-                    animation_speed = 0.088, -- frames per tick
-                }
-            }
-        }
-    }
-}

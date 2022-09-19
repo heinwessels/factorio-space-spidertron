@@ -5,10 +5,6 @@ function create_dock_data(dock_entity)
     return {
         occupied = false,
 
-        -- Keep track of sprites drawed so we
-        -- can pop them out later.
-        docked_sprites = {},
-        
         -- Remember the normal type of the spider docked here
         spider_name = nil,
 
@@ -80,70 +76,6 @@ function get_spider_data_from_entity(spider)
         spider_data = global.spiders[spider.unit_number]
     end
     return spider_data
-end
-
-function draw_docked_spider(dock_data, spider_name, color)
-    local dock = dock_data.dock_entity
-
-    -- Offset to place sprite at correct location
-    -- This assumes we're not drawing the bottom
-    local offset = {0, -0.35}
-    local render_layer = "object"
-    
-    -- Draw shadows
-    table.insert(dock_data.docked_sprites, 
-        rendering.draw_sprite{
-            sprite = "ss-docked-"..spider_name.."-shadow", 
-            target = dock, 
-            surface = dock.surface,
-            target_offset = offset,
-            render_layer = render_layer,
-        }
-    )
-
-    -- First draw main layer
-    table.insert(dock_data.docked_sprites, 
-        rendering.draw_sprite{
-            sprite = "ss-docked-"..spider_name.."-main", 
-            target = dock, 
-            surface = dock.surface,
-            target_offset = offset,
-            render_layer = render_layer,
-        }
-    )
-
-    -- Then draw tinted layer
-    table.insert(dock_data.docked_sprites, 
-        rendering.draw_sprite{
-            sprite = "ss-docked-"..spider_name.."-tint", 
-            target = dock, 
-            surface = dock.surface,
-            tint = color,
-            target_offset = offset,
-            render_layer = render_layer,
-        }
-    )
-
-    -- Finally draw the light animation
-    table.insert(dock_data.docked_sprites, 
-        rendering.draw_animation{
-            animation = "ss-docked-light", 
-            target = dock, 
-            surface = dock.surface,
-            target_offset = offset,
-            render_layer = render_layer,
-            animation_offset = math.random(15), -- Not sure how to start at frame 0
-        }
-    )
-end
-
--- Destroys sprites from a dock and also removes
--- their entries in it's data
-function pop_dock_sprites(dock_data)
-    for _, sprite in pairs(dock_data.docked_sprites) do
-        rendering.destroy(sprite)
-    end
-    dock_data.docked_sprites = {}
 end
 
 -- An function to call when an dock action
@@ -317,14 +249,13 @@ function undock_spider(dock, docked_spider)
     end
     local serialized_spider = spidertron_lib.serialise_spidertron(docked_spider)
     spidertron_lib.deserialise_spidertron(spider, serialized_spider)
-    spider.torso_orientation = 0.6 -- Similar to sprite orientation
+    spider.torso_orientation = 0.6 -- orientation it's docked at
     local spider_data = get_spider_data_from_entity(spider)
     spider_data.last_used_dock = dock
 
     -- Clean up
     global.spiders[docked_spider.unit_number] = nil -- Because no destroy event will be called
     docked_spider.destroy{raise_destroy=false}      -- False because it's not a real spider
-    pop_dock_sprites(dock_data)
 
     -- Take some notes
     dock_data.docked_spider = nil
@@ -527,9 +458,8 @@ script.on_event(defines.events.on_entity_died, on_deconstructed)
 script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
 -- We can move docks with picker dollies, regardless
--- of if it contains a spider or not. All we really
--- have to do is redraw the sprites, because the dock
--- entity remains the same entity. It's only moved.
+-- of if it contains a spider or not. We do not allow
+-- moving the spiders though
 function picker_dollies_move_event(event)
     local entity = event.moved_entity
     if entity.name == "ss-spidertron-dock" then
@@ -544,8 +474,7 @@ function picker_dollies_move_event(event)
 end
 
 -- This function is called when the spaceship changes
--- surfaces. We need to update our global tables and redraw
--- the sprites.
+-- surfaces.
 -- Technically this can be called under different circumstances too
 -- but we will assume the spider always need to move to the
 -- new location
@@ -574,7 +503,6 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                 -- First transfer all saved data. And then remove what we don't need
                 -- Doing this funky transfer to also include whatever new fields we might add
                 local key_blacklist = {
-                    ["docked_sprites"]=true, 
                     ["dock_entity"]=true, 
                     ["dock_unit_number"]=true}
                 for key, value in pairs(source_dock_data) do
@@ -667,29 +595,6 @@ script.on_event(defines.events.on_gui_click, function(event)
         attempt_undock(dock_data)
     end
 end)
-
--- This will be called when something changes
--- to ensure all docks are drawn on the most
--- up-to-date way
-function redraw_all_docks()
-    for _, surface in pairs(game.surfaces) do
-        for _, dock in pairs(surface.find_entities_filtered{
-            name = "ss-spidertron-dock"
-        }) do
-            if global.docks[dock.unit_number] then
-                local dock_data = get_dock_data_from_entity(dock)
-                if dock_data.occupied then
-                    pop_dock_sprites(dock_data)
-                    draw_docked_spider(
-                        dock_data, 
-                        dock_data.serialized_spider.name,
-                        dock_data.serialized_spider.color
-                    )
-                end
-            end
-        end
-    end
-end
 
 function build_spider_whitelist()
     local whitelist = {}
