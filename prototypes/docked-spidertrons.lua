@@ -16,7 +16,7 @@
 
 local util = require("__core__/lualib/util")
 
-local spider_black_list = require("registry").black_list
+local registry = require("registry")
 
 -- An unmovable leg that will be used for all
 -- docked spidertrons
@@ -133,7 +133,7 @@ local found_at_least_one = false
 local docked_spiders = {}   -- Cannot insert in the loop, otherwise infinite loop
 local dock_description = data.raw.accumulator["ss-spidertron-dock"].localised_description
 for _, spider in pairs(data.raw["spider-vehicle"]) do
-    if not spider_black_list[spider.name] then
+    if not registry.is_blacklisted(spider.name) then
         local docked_spider = attempt_docked_spider(spider)
         if docked_spider then 
             table.insert(docked_spiders, docked_spider)

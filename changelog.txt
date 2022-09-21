@@ -5,6 +5,7 @@ Date: ??.09.2022
     - Docked spiders are now fully functional.
   Changes:
     - Now requires Factorio 1.1.69 or higher.
+    - Better compatability with Spidertron Enhancements.
   Bugfixes:
     - Fix possible crash when docked spider no longer exist after mod change.
 ---------------------------------------------------------------------------------------------------
