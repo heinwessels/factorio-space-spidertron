@@ -490,9 +490,6 @@ script.on_event(defines.events.on_entity_cloned , function(event)
     local source = event.source
     local destination = event.destination
     if source and source.valid and destination and destination.valid then
-        -- We will undock and redock the spider to not have to duplicate
-        -- code. We will only do it relative to the dock, and delete the
-        -- cloned spider. That way we have full control of what's happening
         if source.name == "ss-spidertron-dock" then
             local source_dock_data = get_dock_data_from_entity(source)
             if source_dock_data.occupied then
@@ -503,12 +500,23 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                 if destination_dock_data.occupied then return end -- Shouldn't happen
                 spider_data.armed_for = destination 
                 
+                -- Workaround for engine bug where
+                -- remote connections are lost
+                -- forums.factorio.com/103519
+                local connected_remotes = {}
+                spidertron_lib.find_remotes(docked_spider, connected_remotes)
+
                 -- Move spider entity
                 docked_spider.teleport({
                     destination.position.x,
                     destination.position.y + 0.01 -- To draw spidertron over dock entity
                 }, destination.surface)
                 
+                -- Recreate connections
+                for _, remote_stack in pairs(connected_remotes) do
+                    remote_stack.connected_entity = docked_spider
+                end
+
                 -- First transfer all saved data. And then remove what we don't need
                 -- Doing this funky transfer to also include whatever new fields we might add
                 local key_blacklist = {
@@ -522,7 +530,7 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                 global.docks[source.unit_number] = nil -- Reset old dock
             end
         elseif string.match(source.name, "ss[-]docked[-]") then
-            -- Destroy cloned docked spiders. We create them ourselves
+            -- Destroy cloned docked spiders. We just move the old one
             -- The data will be destroyed with the dock transfer
             destination.destroy{raise_destroy=false}
         end

@@ -51,8 +51,8 @@ local function find_remotes(spidertron, connected_remotes)
       end
     end
   end
-
 end
+spidertron_lib.find_remotes = find_remotes
 
 local function copy_inventory(old_inventory, inventory, filter_table)
   if not inventory then
