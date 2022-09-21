@@ -11,50 +11,26 @@ if mods["space-exploration-menu-simulations"] then
             if lame_spider then
                 local surface = lame_spider.surface            
                 local position = {-21, -5}
+                lame_spider.destroy()
 
                 local dock = surface.create_entity{
                     name="ss-spidertron-dock", position=position}
 
-                local offset = {0, -0.35}    
-                local render_layer = "object"
-                rendering.draw_sprite{
-                    sprite = "ss-docked-spidertron-shadow", 
-                    target = dock, 
-                    surface = dock.surface,
-                    target_offset = offset,
-                    render_layer = render_layer,
+                local spider = game.surfaces.nauvis.create_entity{
+                    name="ss-docked-ss-space-spidertron",
+                    position = {
+                        dock.position.x,
+                        dock.position.y + 0.01
+                    },
                 }
-                rendering.draw_sprite{
-                    sprite = "ss-docked-spidertron-main", 
-                    target = dock, 
-                    surface = dock.surface,
-                    target_offset = offset,
-                    render_layer = render_layer,
-                }
-            
-                rendering.draw_sprite{
-                    sprite = "ss-docked-spidertron-tint", 
-                    target = dock, 
-                    surface = dock.surface,
-                    tint = {a=0.5, b=0, g=1, r=0},
-                    target_offset = offset,
-                    render_layer = render_layer,
-                }
-                rendering.draw_animation{
-                    animation = "ss-docked-light", 
-                    target = dock, 
-                    surface = dock.surface,
-                    target_offset = offset,
-                    animation_offset = math.random(15),
-                    render_layer = render_layer,
-                }
+                spider.torso_orientation = 0.6
+                spider.color = {1, 1, 1, 0.5}
                 
-                lame_spider.destroy()
             end
         ]]
         
         -- For debugging
-        -- data.raw["utility-constants"]["default"].main_menu_simulations = {spaceship_dual_shuttles}
+        data.raw["utility-constants"]["default"].main_menu_simulations = {spaceship_dual_shuttles}
     end
 
     
