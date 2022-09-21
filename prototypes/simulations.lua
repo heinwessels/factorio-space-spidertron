@@ -30,7 +30,7 @@ if mods["space-exploration-menu-simulations"] then
         ]]
         
         -- For debugging
-        data.raw["utility-constants"]["default"].main_menu_simulations = {spaceship_dual_shuttles}
+        -- data.raw["utility-constants"]["default"].main_menu_simulations = {spaceship_dual_shuttles}
     end
 
     

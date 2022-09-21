@@ -501,6 +501,7 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                 local spider_data = get_spider_data_from_entity(docked_spider)
                 local destination_dock_data = get_dock_data_from_entity(destination)
                 if destination_dock_data.occupied then return end -- Shouldn't happen
+                spider_data.armed_for = destination 
                 
                 -- Move spider entity
                 docked_spider.teleport({
