@@ -3,6 +3,8 @@
 -- update all existing docked spiders
 
 local spidertron_lib = require("lib.spidertron_lib")
+global.docks = global.docks or {}
+global.spiders = global.spiders or {}
 
 -- There's some docks that needs to be removed from storage
 -- because I made a booboo.
@@ -18,7 +20,7 @@ for unit_number, dock_data in pairs(global.docks) do
     -- custom picker dolly handler never functioned, 
     -- and thus never created bad data. I'll leave this
     -- in though.
-    if dock.name ~= "ss-spidertron-dock" then
+    if not dock or not dock.valid or dock.name ~= "ss-spidertron-dock" then
         table.insert(mark_for_deletion, unit_number)
     else
         if dock and dock.valid then
@@ -29,33 +31,44 @@ for unit_number, dock_data in pairs(global.docks) do
                 -- so they are removed automatically
                 dock_data.docked_sprites = nil
 
-                -- Now create the spidertron entity
-                local docked_spider = dock.surface.create_entity{
-                    name="ss-docked-"..dock_data.serialized_spider.name,
-                    position = {
-                        dock.position.x,
-                        dock.position.y + 0.01 -- To draw spidertron over dock entity
-                    },
-                    force=dock.force,
-                    create_build_effect_smoke=false,
-                    raise_built=false, --  Not a real spider
-                }
-                if docked_spider then
-                    docked_spider.destructible = false -- Only dock can be attacked
-                    spidertron_lib.deserialise_spidertron(docked_spider, dock_data.serialized_spider)
-                    docked_spider.torso_orientation = 0.6
-                    global.spiders[docked_spider.unit_number] = {
-                        spider_entity=docked_spider,
-                        unit_number=docked_spider.unit_number,
-                        original_spider_name=dock_data.serialized_spider.name,
-                        armed_for=dock,
+                local docked_name = "ss-docked-"..dock_data.serialized_spider.name
+
+                -- It might be that the docked version no longer exists
+                -- because of a mods change or something. Check if it exists!
+                if game.entity_prototypes[docked_name] then
+                
+                    -- Now create the spidertron entity
+                    local docked_spider = dock.surface.create_entity{
+                        name=docked_name,
+                        position = {
+                            dock.position.x,
+                            dock.position.y + 0.01 -- To draw spidertron over dock entity
+                        },
+                        force=dock.force,
+                        create_build_effect_smoke=false,
+                        raise_built=false, --  Not a real spider
                     }
-                    
-                    dock_data.spider_name = dock_data.serialized_spider.name
-                    dock_data.docked_spider = docked_spider
-                    
-                    -- Clean up what's left
-                    dock_data.serialized_spider = nil
+                    if docked_spider then
+                        docked_spider.destructible = false -- Only dock can be attacked
+                        spidertron_lib.deserialise_spidertron(docked_spider, dock_data.serialized_spider)
+                        docked_spider.torso_orientation = 0.6
+                        global.spiders[docked_spider.unit_number] = {
+                            spider_entity=docked_spider,
+                            unit_number=docked_spider.unit_number,
+                            original_spider_name=dock_data.serialized_spider.name,
+                            armed_for=dock,
+                        }
+                        
+                        dock_data.spider_name = dock_data.serialized_spider.name
+                        dock_data.docked_spider = docked_spider
+                        
+                        -- Clean up what's left
+                        dock_data.serialized_spider = nil
+
+                    else
+                        -- If the prototype no longer exists then we need to empty this dock's data
+                        table.insert(mark_for_deletion, unit_number)
+                    end
                 else
                     -- If this doesn't work then a dock will remain that looks empty
                     -- but has an spider docked with a serialized spider still in the data
