@@ -182,6 +182,16 @@ function dock_does_not_support_spider(dock, spider)
     end
 end
 
+-- Transfers some more things that's not caught
+-- in Xurimoth's spidertron_lib
+local function transfer_spider_data(old, new)    
+    spidertron_lib.deserialise_spidertron(
+        new, spidertron_lib.serialise_spidertron(old))
+
+    -- TODO Handle transfer of robots, similar
+    -- to jetpack maybe?
+end
+
 -- This will dock a spider, and not
 -- do any checks.
 function dock_spider(dock, spider)
@@ -205,8 +215,7 @@ function dock_spider(dock, spider)
         raise_built = false, -- Because it's not a real spider
     }
     docked_spider.destructible = false -- Only dock can be attacked
-    local serialized_spider = spidertron_lib.serialise_spidertron(spider)
-    spidertron_lib.deserialise_spidertron(docked_spider, serialized_spider)
+    transfer_spider_data(spider, docked_spider)
     docked_spider.torso_orientation = 0.6 -- Looks nice
     local docked_spider_data = get_spider_data_from_entity(docked_spider)
     docked_spider_data.original_spider_name = spider.name
@@ -247,8 +256,7 @@ function undock_spider(dock, docked_spider)
         -- TODO Handle this error nicely!
         error("Error! Couldn't spawn spider!\n"..serpent.block(dock_data))
     end
-    local serialized_spider = spidertron_lib.serialise_spidertron(docked_spider)
-    spidertron_lib.deserialise_spidertron(spider, serialized_spider)
+    transfer_spider_data(docked_spider, spider)
     spider.torso_orientation = 0.6 -- orientation it's docked at
     local spider_data = get_spider_data_from_entity(spider)
     spider_data.last_used_dock = dock

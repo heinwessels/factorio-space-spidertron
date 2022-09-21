@@ -148,6 +148,7 @@ function spidertron_lib.serialise_spidertron(spidertron)
   serialised_data.vehicle_logistic_requests_enabled = spidertron.vehicle_logistic_requests_enabled
   serialised_data.enable_logistics_while_moving = spidertron.enable_logistics_while_moving
   serialised_data.vehicle_automatic_targeting_parameters = spidertron.vehicle_automatic_targeting_parameters
+  serialised_data.request_from_buffers = spidertron.request_from_buffers
 
   serialised_data.autopilot_destinations = spidertron.autopilot_destinations
   serialised_data.follow_target = spidertron.follow_target
@@ -224,7 +225,8 @@ function spidertron_lib.deserialise_spidertron(spidertron, serialised_data, tran
                             "vehicle_automatic_targeting_parameters",
                             "follow_target",
                             "follow_offset",
-                            "selected_gun_index"} do
+                            "selected_gun_index",
+                            "request_from_buffers"} do
     local value = serialised_data[attribute]
     if value ~= nil then
       spidertron[attribute] = value
