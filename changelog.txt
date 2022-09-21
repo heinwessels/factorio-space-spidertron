@@ -1,8 +1,12 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: ??.09.2022
+  Features:
+    - Docked spiders are now fully functional.
   Changes:
     - Now requires Factorio 1.1.69 or higher.
+  Bugfixes:
+    - Fix possible crash when docked spider no longer exist after mod change.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: 18.09.2022

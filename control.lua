@@ -613,6 +613,31 @@ script.on_event(defines.events.on_gui_click, function(event)
     end
 end)
 
+-- It might be that some docks had their docked
+-- spidey removed because mods changed. Clean them up
+local function sanitize_docks()
+    local marked_for_deletion = {}
+    for unit_number, dock_data in pairs(global.docks) do
+        local dock = dock_data.dock_entity
+        if dock and dock.valid then
+            if dock_data.occupied then
+                if not dock_data.docked_spider or not dock_data.docked_spider.valid then
+                    -- The docked spider was deleted or prototype removed                    
+                    table.insert(marked_for_deletion, unit_number)
+                end
+            end
+        else
+            -- TODO what if there was a spider docked?
+            table.insert(marked_for_deletion, unit_number)
+        end
+    end
+
+    -- Clean up docks I marked for deletion
+    for _, unit_number in pairs(marked_for_deletion) do
+        global.docks[unit_number] = nil
+    end
+end
+
 function build_spider_whitelist()
     local whitelist = {}
     local spiders = game.get_filtered_entity_prototypes({{filter="type", type="spider-vehicle"}})
@@ -663,6 +688,7 @@ script.on_configuration_changed(function (event)
     global.spider_whitelist = build_spider_whitelist()
     
     picker_dollies_blacklist_docked_spiders()
+    sanitize_docks()
 
     -- Fix technologies
     local technology_unlocks_spidertron = false
