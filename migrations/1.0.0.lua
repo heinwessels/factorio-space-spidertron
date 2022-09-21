@@ -64,17 +64,16 @@ for unit_number, dock_data in pairs(global.docks) do
                         
                         -- Clean up what's left
                         dock_data.serialized_spider = nil
-
-                    else
-                        -- If the prototype no longer exists then we need to empty this dock's data
-                        table.insert(mark_for_deletion, unit_number)
                     end
                 else
-                    -- If this doesn't work then a dock will remain that looks empty
-                    -- but has an spider docked with a serialized spider still in the data
-                    -- I might be able to fix that if someone complains. But it shouldn't 
-                    -- happen, so, meh.
+                    -- If the prototype no longer exists then we need to empty this dock's data
+                    table.insert(mark_for_deletion, unit_number)
                 end
+            else
+                -- If this doesn't work then a dock will remain that looks empty
+                -- but has an spider docked with a serialized spider still in the data
+                -- I might be able to fix that if someone complains. But it shouldn't 
+                -- happen, so, meh.
             end
         else
             -- This dock entity no longer exists. Odd.
