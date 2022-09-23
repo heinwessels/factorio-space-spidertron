@@ -661,6 +661,36 @@ function picker_dollies_blacklist_docked_spiders()
     end
 end
 
+if script.active_mods["SpidertronEnhancements"] then
+    -- This event fires when Spidertron Enhancements is used
+    -- and a waypoint-with-pathfinding is created. This mod
+    -- has a check ignore docked spidertrons, but we still
+    -- want to send a message.
+    script.on_event("spidertron-enhancements-use-alt-spidertron-remote", function(event)
+        local player = game.get_player(event.player_index)
+        if not player then return end
+        local cursor_item = player.cursor_stack
+        if cursor_item and cursor_item.valid_for_read and (cursor_item.type == "spidertron-remote" and cursor_item.name ~= "sp-spidertron-patrol-remote") then
+            local spider = cursor_item.connected_entity
+            if spider and string.match(spider.name, "ss[-]docked[-]") then            
+                -- Prevent the auto pilot in case, but shouldn't be required
+                spider.follow_target = nil
+                spider.autopilot_destination = nil
+
+                -- Let the player know
+                spider.surface.play_sound{path="ss-no-no", position=spider.position}
+                spider.surface.create_entity{
+                    name = "flying-text",
+                    position = spider.position,
+                    text = {"space-spidertron-dock.cannot-command"},
+                    color = {r=1,g=1,b=1,a=1},
+                }
+            end
+        end
+    end
+    )
+end
+
 script.on_init(function()
     global.docks = {}
     global.spiders = {}

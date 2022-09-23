@@ -64,7 +64,7 @@ function attempt_docked_spider(spider)
     docked_spider.name = "ss-docked-"..spider.name
     docked_spider.localised_name = {"space-spidertron-dock.docked-spider", spider.name}
     
-    docked_spider.minable.mining_time = 1
+    docked_spider.minable = {result = nil, mining_time = 1}
     docked_spider.torso_bob_speed = 0
     docked_spider.allow_passengers = false
     docked_spider.height = 0.35 -- To place spider on top of dock
