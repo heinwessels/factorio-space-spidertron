@@ -567,24 +567,23 @@ function update_spider_gui_for_player(player, spider)
         -- Build starting frame
         local anchor = {
             gui=defines.relative_gui_type.spider_vehicle_gui, 
-            position=defines.relative_gui_position.right
+            position=defines.relative_gui_position.top
         }
-        local frame = player.gui.relative.add{
+        local invisible_frame = player.gui.relative.add{
             name="ss-docked-spider", 
             type="frame", 
+            style="ss_invisible_frame",
             anchor=anchor,
 
-            -- The tag associates the GUI with this
-            -- specific dock 
             tags = {spider_unit_number = spider.unit_number}
         }
 
         -- Add button
-        frame.add{
+        invisible_frame.add{
             type = "button",
             name = "spidertron-undock-button",
             caption = {"space-spidertron-dock.undock"},
-            style = "green_button",
+            style = "ss_undock_button",
         }
     end
 end
