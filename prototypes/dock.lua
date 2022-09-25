@@ -1,4 +1,5 @@
 local sounds = require("__base__.prototypes.entity.sounds")
+local util = require("__core__/lualib/util")
 
 local localised_description = {"", 
   {"space-spidertron-dock.description"}, 
@@ -16,7 +17,7 @@ table.insert(localised_description, {"space-spidertron-dock.supported"})
 local dock = {
     -- Type radar so that we have an animation to work with
     type = "accumulator",
-    name = "ss-spidertron-dock",
+    name = "ss-spidertron-dock-active",
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
     localised_description = localised_description,
     minable = {mining_time = 0.1, result = "ss-spidertron-dock"},
@@ -130,7 +131,7 @@ local dock_item = {
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
     order = "b[personal-transport]-c[spidertron]-d[spidertron-dock]",
-    place_result = "ss-spidertron-dock",
+    place_result = "ss-spidertron-dock-active",
     stack_size = 20
 }
 
@@ -149,3 +150,9 @@ local dock_recipe = {
 }
 
 data:extend{dock, dock_item, dock_recipe}
+
+
+-- Now create the passive dock
+local dock_passive = util.table.deepcopy(dock)
+dock_passive.name = "ss-spidertron-dock-passive"
+data:extend{dock_passive}

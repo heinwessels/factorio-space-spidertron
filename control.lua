@@ -1,6 +1,10 @@
 local util = require("__core__/lualib/util")
 local spidertron_lib = require("lib.spidertron_lib")
 
+local function name_is_dock(name)
+    return not (string.match(name, "ss[-]spidertron[-]dock") == nil)
+end
+
 function create_dock_data(dock_entity)
     return {
         occupied = false,
@@ -9,7 +13,12 @@ function create_dock_data(dock_entity)
         spider_name = nil,
 
         -- Keep a reference to the docked spider
+        -- Only used when in `active` mode
         docked_spider = nil,
+
+        -- Keeps a serialized version of the spider
+        -- Only used when in `passive` mode
+        serialized_spider = nil,
 
         -- Can be nil when something goes wrong
         dock_entity = dock_entity,
@@ -17,6 +26,9 @@ function create_dock_data(dock_entity)
         -- Keep this in here so that it's easy to
         -- find this entry in global
         unit_number = dock_entity.unit_number,
+
+        -- 'active' or `passive`. 
+        type = string.find(dock_entity.name, "passive") and "passive" or "active",
     }
 end
 
@@ -55,7 +67,7 @@ function create_spider_data(spider_entity)
 end
 
 function get_dock_data_from_entity(dock)
-    if not dock.name == "ss-spidertron-dock" then return end
+    if not name_is_dock(dock.name) then return end
     local dock_data = global.docks[dock.unit_number]
     if not dock_data then
         global.docks[dock.unit_number] = create_dock_data(dock)
@@ -279,6 +291,8 @@ function attempt_dock(spider)
     local spider_data = get_spider_data_from_entity(spider)
     if not spider_data.armed_for then return end
 
+    do return end
+
     -- Find the dock this spider armed for in the region
     -- We check the area because spidertrons are innacurate
     -- and will not always stop on top of the dock
@@ -323,6 +337,8 @@ function attempt_undock(dock_data, force)
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
     
+    do return end
+
     -- Some sanity check. If this happens, then something bad happens.
     -- Just quitly sweep it under the rug
     if not dock.valid then 
@@ -465,9 +481,46 @@ script.on_event(defines.events.on_robot_mined_entity, on_deconstructed)
 script.on_event(defines.events.on_entity_died, on_deconstructed)
 script.on_event(defines.events.script_raised_destroy, on_deconstructed)
 
+-- This will toggle the dock between active and passive mode.
+-- This will change the actual dock entity below so that
+-- it's easy to copy-paste with settings. And have better tooltips
+script.on_event("ss-spidertron-dock-toggle", function(event)
+    local player = game.get_player(event.player_index)
+    if not player then return end
+    local dock = player.selected
+    if not dock or not dock.valid then return end
+    if dock.force ~= player.force then return end
+    if not name_is_dock(dock.name) then return end
+    
+    -- By this point we know that this is a dock the player can toggle
+    -- We need to be careful with the data
+    local dock_data = get_dock_data_from_entity(dock)
+    local new_mode = dock_data.type == "active" and "passive" or "active"
+
+    -- Create the new entity
+    local new_dock = dock.surface.create_entity{
+        name = "ss-spidertron-dock-"..new_mode,
+        position = dock.position,
+        force = dock.force,
+        create_build_effect_smoke = true, -- Will create the effect
+        raise_built = true,
+        player = player,
+    }
+
+    -- Transfer the data
+    local new_dock_data = get_dock_data_from_entity(dock)
+    
+
+    -- Remove the old dock
+    dock.destroy{raise_destroy=true} -- Will also delete this dock's data
+
+end)
+
+
+
 -- We can move docks with picker dollies, regardless
 -- of if it contains a spider or not. We do not allow
--- moving the spiders though
+-- moving the spiders though 
 function picker_dollies_move_event(event)
     local entity = event.moved_entity
     if entity.name == "ss-spidertron-dock" then
