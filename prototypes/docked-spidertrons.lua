@@ -189,6 +189,8 @@ function attempt_docked_spider(spider)
     if not spider.graphics_set.animation then return end
     if not spider.graphics_set.shadow_animation then return end
 
+    if not attempt_build_sprite(spider) then return end
+
     -- Good enough to start the construction attempt
     local docked_spider = util.copy(spider)
     docked_spider.name = "ss-docked-"..spider.name
@@ -287,3 +289,49 @@ if not found_at_least_one then
     error("Could not find any spiders that can dock")
 end
 for _, docked_spider in pairs(docked_spiders) do data:extend{docked_spider} end
+
+
+
+-- Create the docking light. Not strictly a _spidertron_
+-- sprite, but it's declared here anyway
+data:extend{
+    {
+        -- We declare it as an animation because that can
+        -- animate and have act as a light as well
+        type = "animation",
+        name = "ss-docked-light",
+        layers = {
+            {
+                filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+                blend_mode = "additive",
+                draw_as_glow = true,    -- Draws a sprite and a light
+                width = 19,
+                height = 19,
+                shift = { -0.42, 0.5 },
+                scale = 0.4,
+                run_mode = "forward-then-backward",
+                frame_count = 16,
+                line_length = 8,
+                -- 3 second loop, meaning 16 frames per 180 ticks
+                animation_speed = 0.088, -- frames per tick
+
+                hr_version =
+                {
+                    filename = "__space-spidertron__/graphics/spidertron-dock/dock-light.png",
+                    blend_mode = "additive",
+                    draw_as_glow = true,    -- Draws a sprite and a light
+                    width = 19,
+                    height = 19,
+                    shift = { -0.42, 0.5 },
+                    scale = 0.4,
+                    run_mode = "forward-then-backward",
+                    frame_count = 16,
+                    line_length = 8,
+
+                    -- 3 second loop, meaning 16 frames per 180 ticks
+                    animation_speed = 0.088, -- frames per tick
+                }
+            }
+        }
+    }
+}
