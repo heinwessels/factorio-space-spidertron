@@ -609,7 +609,7 @@ script.on_event("ss-spidertron-dock-toggle", function(event)
         name = "ss-spidertron-dock-"..new_mode,
         position = dock.position,
         force = dock.force,
-        create_build_effect_smoke = true, -- Will create the effect
+        create_build_effect_smoke = false,
         raise_built = true,
         player = player,
     } -- Will set the mode correctly

@@ -1,25 +1,12 @@
 local sounds = require("__base__.prototypes.entity.sounds")
 local util = require("__core__/lualib/util")
 
-local localised_description = {"", 
-  {"space-spidertron-dock.description"}, 
-  {"space-spidertron-dock.description-use"}
-}
-if mods["space-exploration"] then
-  localised_description = {"", 
-    {"space-spidertron-dock.description-se"}, 
-    {"space-spidertron-dock.description-use"},
-  }
-end
-
-table.insert(localised_description, {"space-spidertron-dock.supported"})
-
-local dock = {
+local dock_active = {
     -- Type radar so that we have an animation to work with
     type = "accumulator",
     name = "ss-spidertron-dock-active",
+    localised_name = {"entity-name.ss-spidertron-dock"},
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
-    localised_description = localised_description,
     minable = {mining_time = 0.1, result = "ss-spidertron-dock"},
     icon_size = 64, icon_mipmaps = 4,
     flags = {"placeable-player", "player-creation"},
@@ -127,7 +114,6 @@ local dock_item = {
     type = "item",
     name = "ss-spidertron-dock",
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
-    localised_description = localised_description,
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
     order = "b[personal-transport]-c[spidertron]-d[spidertron-dock]",
@@ -149,10 +135,25 @@ local dock_recipe = {
     result = "ss-spidertron-dock"
 }
 
-data:extend{dock, dock_item, dock_recipe}
-
-
--- Now create the passive dock
-local dock_passive = util.table.deepcopy(dock)
+local dock_passive = util.table.deepcopy(dock_active)
 dock_passive.name = "ss-spidertron-dock-passive"
-data:extend{dock_passive}
+
+data:extend{dock_active, dock_passive, dock_item, dock_recipe}
+
+
+-- Create descriptions
+dock_active = data.raw.accumulator["ss-spidertron-dock-active"]
+dock_passive = data.raw.accumulator["ss-spidertron-dock-passive"]
+
+for i, dock in pairs({dock_active, dock_passive}) do
+  dock.localised_description = {""}
+  if mods["space-exploration"] then
+    table.insert(dock.localised_description, {"space-spidertron-dock.description-se"})
+  else
+    table.insert(dock.localised_description, {"space-spidertron-dock.description"})
+  end
+  table.insert(dock.localised_description, 
+    {"space-spidertron-dock.description-mode-"..(i==1 and "active" or "passive")})
+  table.insert(dock.localised_description, {"space-spidertron-dock.description-use"})
+  table.insert(dock.localised_description, {"space-spidertron-dock.supported"})
+end

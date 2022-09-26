@@ -195,6 +195,7 @@ function attempt_docked_spider(spider)
     local docked_spider = util.copy(spider)
     docked_spider.name = "ss-docked-"..spider.name
     docked_spider.localised_name = {"space-spidertron-dock.docked-spider", spider.name}
+    docked_spider.localised_description = {"space-spidertron-dock.docked-spider-description"}
     
     docked_spider.minable = {result = nil, mining_time = 1}
     docked_spider.torso_bob_speed = 0
@@ -260,10 +261,21 @@ function attempt_docked_spider(spider)
     return docked_spider
 end
 
+local function safely_insert_description(descriptions, addition)
+    if (#descriptions + 1) < 20 then -- +1 for the empty "" at the start
+        if (#descriptions + 1) < 19 then
+            table.insert(descriptions, addition)
+        else
+            table.insert(dock_active_description, {"space-spidertron-dock.etc"})
+        end
+    end
+end
+
 -- Loop through all spider vehicles
 local found_at_least_one = false
 local docked_spiders = {}   -- Cannot insert in the loop, otherwise infinite loop
-local dock_description = data.raw.accumulator["ss-spidertron-dock-active"].localised_description
+local dock_active_description = data.raw.accumulator["ss-spidertron-dock-active"].localised_description
+local dock_passive_description = data.raw.accumulator["ss-spidertron-dock-passive"].localised_description
 for _, spider in pairs(data.raw["spider-vehicle"]) do
     if not registry.is_blacklisted(spider.name) then
         local docked_spider = attempt_docked_spider(spider)
@@ -271,17 +283,10 @@ for _, spider in pairs(data.raw["spider-vehicle"]) do
             table.insert(docked_spiders, docked_spider)
             found_at_least_one = true
 
-            -- Update dock description to show supported 
-            -- This will update both the entity and the item
-            -- because they use the same table
-            if (#dock_description + 1) < 20 then -- +1 for the empty "" at the start
-                if (#dock_description + 1) < 19 then
-                    table.insert(dock_description, 
-                        {"space-spidertron-dock.supported-spider", spider.name})
-                else
-                    table.insert(dock_description, {"space-spidertron-dock.etc"})
-                end
+            for _, description in pairs({dock_active_description, dock_passive_description}) do
+                safely_insert_description(description, {"space-spidertron-dock.supported-spider", spider.name})
             end
+            
         end
     end
 end
