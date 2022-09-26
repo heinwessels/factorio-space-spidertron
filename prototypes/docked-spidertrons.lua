@@ -229,6 +229,7 @@ function attempt_docked_spider(spider)
             height = 19,
             shift = { -0.42, 0.5 },
             scale = 0.4,
+            tint = {r=0.173, g=0.824, b=0.251, a=1},
             run_mode = "forward-then-backward",
             frame_count = 16,
             line_length = 8,
@@ -245,6 +246,7 @@ function attempt_docked_spider(spider)
                 height = 19,
                 shift = { -0.42, 0.5 },
                 scale = 0.4,
+                tint = {r=0.173, g=0.824, b=0.251, a=1},
                 run_mode = "forward-then-backward",
                 frame_count = 16,
                 line_length = 8,
@@ -297,8 +299,8 @@ for _, docked_spider in pairs(docked_spiders) do data:extend{docked_spider} end
 
 
 
--- Create the docking light. Not strictly a _spidertron_
--- sprite, but it's declared here anyway
+-- Create the docking light. This will be used when
+-- the spider is docked in passive mode
 data:extend{
     {
         -- We declare it as an animation because that can
@@ -314,6 +316,7 @@ data:extend{
                 height = 19,
                 shift = { -0.42, 0.5 },
                 scale = 0.4,
+                tint = {r=87/255, g=174/255, b=255/255, a=1},
                 run_mode = "forward-then-backward",
                 frame_count = 16,
                 line_length = 8,
@@ -329,6 +332,7 @@ data:extend{
                     height = 19,
                     shift = { -0.42, 0.5 },
                     scale = 0.4,
+                    tint = {r=0.341, g=0.682, b=1, a=1},
                     run_mode = "forward-then-backward",
                     frame_count = 16,
                     line_length = 8,
