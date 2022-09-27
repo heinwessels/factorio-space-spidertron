@@ -64,6 +64,11 @@ for unit_number, dock_data in pairs(global.docks) do
                         
                         -- Clean up what's left
                         dock_data.serialized_spider = nil
+
+                        -- Keep a tag here so that if a player updates straight from 
+                        -- < 1.0 to 1.1 then his docks can all be set to `passive` mode
+                        -- This is for you Alphaprime
+                        dock_data.was_passive = true
                     end
                 else
                     -- If the prototype no longer exists then we need to empty this dock's data

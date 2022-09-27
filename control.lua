@@ -376,7 +376,7 @@ end
 
 -- This will undock a spider, and not
 -- do any checks.
-function undock_spider(dock, docked_spider)
+function undock_spider(dock)
     local dock_data = get_dock_data_from_entity(dock)
 
     -- Some smoke and mirrors
@@ -471,7 +471,7 @@ function attempt_undock(dock_data, force)
     end
 
     -- Undock the spider!
-    local spider = undock_spider(dock, dock_data.docked_spider)    
+    local spider = undock_spider(dock)
 
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
@@ -864,13 +864,25 @@ local function sanitize_docks()
         local dock = dock_data.dock_entity
         if dock and dock.valid then
             if dock_data.occupied then
-                if dock_data.docked_spider and not dock_data.docked_spider.valid then
-                    -- The docked spider was deleted or prototype removed                    
-                    table.insert(marked_for_deletion, unit_number)
+                if dock.mode == "active" then
+                    if dock_data.docked_spider and not dock_data.docked_spider.valid then
+                        -- This spider entity is no longer supported for docking. In this
+                        -- case the data will be lost
+                        table.insert(marked_for_deletion, unit_number)
+                    end
+                elseif dock.mode == "passive" then
+                    if not global.spider_whitelist[dock_data.spider_name] then
+                        -- This spider is no longer supported. We can undock the spider though
+                        -- because we still have the serialized information
+                        attempt_undock(dock_data, true)
+                        table.insert(marked_for_deletion, unit_number)
+                    end
                 end
             end
         else
-            -- TODO what if there was a spider docked?
+            -- TODO There is some unhandled edge cases here, but
+            -- I'll fix them later. This will only occur if a script
+            -- destroys a dock without an event, which should not happen.
             table.insert(marked_for_deletion, unit_number)
         end
     end
