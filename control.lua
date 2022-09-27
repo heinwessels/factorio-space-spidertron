@@ -864,13 +864,13 @@ local function sanitize_docks()
         local dock = dock_data.dock_entity
         if dock and dock.valid then
             if dock_data.occupied then
-                if dock.mode == "active" then
+                if dock_data.mode == "active" then
                     if dock_data.docked_spider and not dock_data.docked_spider.valid then
                         -- This spider entity is no longer supported for docking. In this
                         -- case the data will be lost
                         table.insert(marked_for_deletion, unit_number)
                     end
-                elseif dock.mode == "passive" then
+                elseif dock_data.mode == "passive" then
                     if not global.spider_whitelist[dock_data.spider_name] then
                         -- This spider is no longer supported. We can undock the spider though
                         -- because we still have the serialized information

@@ -13,14 +13,7 @@ local mark_for_deletion = {}
 for unit_number, dock_data in pairs(global.docks) do
     local dock = dock_data.dock_entity
 
-    -- We had an prior issue where a  bad picker dolly
-    -- handler created a bunch of dummy data. Clean
-    -- it up.
-    -- Edit: Turns out a made a double-boo-boo and my
-    -- custom picker dolly handler never functioned, 
-    -- and thus never created bad data. I'll leave this
-    -- in though.
-    if not dock or not dock.valid or dock.name ~= "ss-spidertron-dock" then
+    if not dock or not dock.valid then
         table.insert(mark_for_deletion, unit_number)
     else
         if dock and dock.valid then
@@ -67,7 +60,6 @@ for unit_number, dock_data in pairs(global.docks) do
 
                         -- Keep a tag here so that if a player updates straight from 
                         -- < 1.0 to 1.1 then his docks can all be set to `passive` mode
-                        -- This is for you Alphaprime
                         dock_data.was_passive = true
                     end
                 else
