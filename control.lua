@@ -793,8 +793,7 @@ function update_spider_gui_for_player(player, spider)
 end
 
 function update_dock_gui_for_player(player, dock)
-    local dock_data = get_dock_data_from_entity(dock)
-
+    
     -- Destroy whatever is there currently for
     -- any player. That's so that the player doesn't
     -- look at an outdated GUI
@@ -805,10 +804,12 @@ function update_dock_gui_for_player(player, dock)
             child.destroy() 
         end
     end
-
+    
     -- All docks have their GUIs destroyed for this player
     -- If this dock is not occupied then we don't need
     -- to redraw anything
+    local dock_data = get_dock_data_from_entity(dock)
+    if not dock_data then return end -- Other accumulator type
     if not dock_data.occupied then return end
 
     -- Decide if we should rebuild. We will only build
