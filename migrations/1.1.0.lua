@@ -115,6 +115,7 @@ for unit_number, dock_data in pairs(global.docks) do
                 -- Transfer the dock data
                 local key_blacklist = {
                     ["mode"]=true,
+                    ["was_passive"]=true,
                     ["dock_entity"]=true,
                     ["unit_number"]=true,
                     ["dock_unit_number"]=true}                    

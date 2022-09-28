@@ -566,13 +566,15 @@ function on_deconstructed(event)
     -- When the dock is destroyed then attempt undock the spider
     local entity = event.entity
     if entity and entity.valid then
-        if entity.name == "ss-spidertron-dock" then
+        if name_is_dock(entity.name) then
             attempt_undock(get_dock_data_from_entity(entity), true)
             global.docks[entity.unit_number] = nil
         elseif entity.type == "spider-vehicle" then
             if name_is_docked_spider(entity.name) then
                 local spider_data = get_spider_data_from_entity(entity)
-                local dock_data = get_dock_data_from_entity(spider_data.armed_for)
+                local dock = spider_data.armed_for
+                if not dock or not dock.valid then return end
+                local dock_data = get_dock_data_from_entity(dock)
                 attempt_undock(dock_data, true)
             else
                 global.spiders[entity.unit_number] = nil
@@ -619,6 +621,7 @@ script.on_event("ss-spidertron-dock-toggle", function(event)
     local key_blacklist = {
         ["mode"]=true,
         ["dock_entity"]=true,
+        ["unit_number"]=true,
         ["dock_unit_number"]=true}
     local new_dock_data = get_dock_data_from_entity(new_dock)
     for key, value in pairs(dock_data) do
@@ -631,17 +634,19 @@ script.on_event("ss-spidertron-dock-toggle", function(event)
     if new_dock_data.occupied then        
         if new_dock_data.mode == "active" then
             -- Dock was passive, so now we need to create a spider entity
-            local serialised_spider = dock_from_passive_to_serialised(dock)
+            local serialised_spider = dock_from_passive_to_serialised(new_dock)
             dock_from_serialised_to_active(new_dock, serialised_spider)
         else
             -- Dock was active, so now we remove a spider entity
-            local serialised_spider = dock_from_active_to_serialised(dock)
+            local serialised_spider = dock_from_active_to_serialised(new_dock)
             dock_from_serialised_to_passive(new_dock, serialised_spider)
         end
     end
 
-    -- Remove the old dock
-    dock.destroy{raise_destroy=true} -- Will also delete this dock's data
+    -- Remove the old dock data first otherwise the deconstrcut handler
+    -- will think the dock is still occupied
+    global.docks[dock_data.unit_number] = nil
+    dock.destroy{raise_destroy=true}
 end)
 
 -- We can move docks with picker dollies, regardless
@@ -649,7 +654,7 @@ end)
 -- moving the spiders though 
 function picker_dollies_move_event(event)
     local entity = event.moved_entity
-    if entity.name == "ss-spidertron-dock" then
+    if entity.name == "ss-spidertron-dock-active" then
         local dock_data = get_dock_data_from_entity(entity)
         if dock_data.occupied then
             dock_data.docked_spider.teleport({
@@ -657,6 +662,9 @@ function picker_dollies_move_event(event)
                 entity.position.y + 0.01 -- To draw spidertron over dock entity
             }, entity.surface)
         end
+    elseif entity.name == "ss-spidertron-dock-passive" then
+        -- This event should handle itself, because the
+        -- sprites are attached to the dock
     end
 end
 
@@ -669,43 +677,60 @@ script.on_event(defines.events.on_entity_cloned , function(event)
     local source = event.source
     local destination = event.destination
     if source and source.valid and destination and destination.valid then
-        if source.name == "ss-spidertron-dock" then
+        if name_is_dock(source.name) then
             local source_dock_data = get_dock_data_from_entity(source)
             if source_dock_data.occupied then
-                -- Move the spider digitally to the new dock
-                local docked_spider = source_dock_data.docked_spider
-                local spider_data = get_spider_data_from_entity(docked_spider)
                 local destination_dock_data = get_dock_data_from_entity(destination)
-                if destination_dock_data.occupied then return end -- Shouldn't happen
-                spider_data.armed_for = destination 
-                
-                -- Workaround for engine bug where
-                -- remote connections are lost
-                -- forums.factorio.com/103519
-                local connected_remotes = {}
-                spidertron_lib.find_remotes(docked_spider, connected_remotes)
-
-                -- Move spider entity
-                docked_spider.teleport({
-                    destination.position.x,
-                    destination.position.y + 0.01 -- To draw spidertron over dock entity
-                }, destination.surface)
-                
-                -- Recreate connections
-                for _, remote_stack in pairs(connected_remotes) do
-                    remote_stack.connected_entity = docked_spider
-                end
 
                 -- First transfer all saved data. And then remove what we don't need
                 -- Doing this funky transfer to also include whatever new fields we might add
                 local key_blacklist = {
                     ["dock_entity"]=true, 
+                    ["unit_number"]=true, 
                     ["dock_unit_number"]=true}
                 for key, value in pairs(source_dock_data) do
                     if not key_blacklist[key] then
                         destination_dock_data[key] = value
                     end
                 end
+                
+                if source_dock_data.mode == "active" then
+                    local docked_spider = source_dock_data.docked_spider
+                    local spider_data = get_spider_data_from_entity(docked_spider)
+                    spider_data.armed_for = destination 
+
+                    -- Workaround for engine bug where
+                    -- remote connections are lost
+                    -- forums.factorio.com/103519
+                    local connected_remotes = {}
+                    spidertron_lib.find_remotes(docked_spider, connected_remotes)
+
+                    -- Move spider entity
+                    docked_spider.teleport({
+                        destination.position.x,
+                        destination.position.y + 0.01 -- To draw spidertron over dock entity
+                    }, destination.surface)
+                    
+                    -- Recreate connections
+                    for _, remote_stack in pairs(connected_remotes) do
+                        remote_stack.connected_entity = docked_spider
+                    end
+                else
+                    -- 'passive' mode
+                    for _, sprite in pairs(source_dock_data.docked_sprites) do
+                        rendering.destroy(sprite)
+                    end
+                    source_dock_data.docked_sprites = {}
+                    draw_docked_spider(
+                        destination,
+                        destination_dock_data.spider_name,
+                        destination_dock_data.serialised_spider.color
+                    )
+
+
+                end
+
+                -- Remove the old dock data entry
                 global.docks[source.unit_number] = nil -- Reset old dock
             end
         elseif name_is_docked_spider(source.name) then
