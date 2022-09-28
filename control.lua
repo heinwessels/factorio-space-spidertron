@@ -293,7 +293,7 @@ local function dock_from_serialised_to_spider(dock, serialised_spider)
         raise_built = true,                 -- Regular spider it is
     }
     spidertron_lib.deserialise_spidertron(spider, serialised_spider)
-    spider.torso_orientation = 0.6 -- orientation it's docked at
+    spider.torso_orientation = 0.58 -- orientation of sprite
     local spider_data = get_spider_data_from_entity(spider)
     spider_data.last_used_dock = dock
     dock_data.occupied = false
@@ -327,7 +327,7 @@ local function dock_from_serialised_to_active(dock, serialised_spider)
         name = "ss-docked-"..dock_data.spider_name,
         position = {
             dock.position.x,
-            dock.position.y + 0.01 -- To draw spidertron over dock entity
+            dock.position.y + 0.004 -- To draw spidertron over dock entity
         },
         force = dock.force,
         create_build_effect_smoke = false,
@@ -335,7 +335,7 @@ local function dock_from_serialised_to_active(dock, serialised_spider)
     }
     docked_spider.destructible = false -- Only dock can be attacked
     spidertron_lib.deserialise_spidertron(docked_spider, serialised_spider)
-    docked_spider.torso_orientation = 0.6 -- Looks nice
+    docked_spider.torso_orientation = 0.58 -- Looks nice
     local docked_spider_data = get_spider_data_from_entity(docked_spider)
     docked_spider_data.original_spider_name = serialised_spider.name
     docked_spider_data.armed_for = dock
@@ -641,7 +641,20 @@ script.on_event("ss-spidertron-dock-toggle", function(event)
             local serialised_spider = dock_from_active_to_serialised(new_dock)
             dock_from_serialised_to_passive(new_dock, serialised_spider)
         end
+        
+        -- Play nice sound if dock is occupied
+        dock.surface.play_sound{
+            path="ss-spidertron-dock-mode-"..new_dock_data.mode, 
+            position=new_dock.position
+        }
     end
+
+    dock.surface.create_entity{
+        name = "flying-text",
+        position = dock.position,
+        text = {"space-spidertron-dock.mode-to-"..new_dock_data.mode},
+        color = {r=1,g=1,b=1,a=1},
+    }
 
     -- Remove the old dock data first otherwise the deconstrcut handler
     -- will think the dock is still occupied

@@ -44,7 +44,7 @@ for unit_number, dock_data in pairs(global.docks) do
                     if docked_spider then
                         docked_spider.destructible = false -- Only dock can be attacked
                         spidertron_lib.deserialise_spidertron(docked_spider, dock_data.serialized_spider)
-                        docked_spider.torso_orientation = 0.6
+                        docked_spider.torso_orientation = 0.58
                         global.spiders[docked_spider.unit_number] = {
                             spider_entity=docked_spider,
                             unit_number=docked_spider.unit_number,

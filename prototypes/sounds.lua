@@ -20,6 +20,16 @@ data:extend({
         filename = "__base__/sound/cargo-wagon-open.ogg",
     },
     {
+        name = "ss-spidertron-dock-mode-active",
+        type = "sound",
+        filename = "__base__/sound/spidertron/spidertron-activate.ogg",
+    },
+    {
+        name = "ss-spidertron-dock-mode-passive",
+        type = "sound",
+        filename = "__base__/sound/spidertron/spidertron-deactivate.ogg",
+    },
+    {
         name = "ss-no-no",
         type = "sound",
         filename = "__core__/sound/cannot-build.ogg",
