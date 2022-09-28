@@ -7,6 +7,7 @@ local dock_active = {
     name = "ss-spidertron-dock-active",
     localised_name = {"entity-name.ss-spidertron-dock"},
     icon = "__space-spidertron__/graphics/spidertron-dock/dock-icon.png",
+    placeable_by = {item="ss-spidertron-dock", count=1},
     minable = {mining_time = 0.1, result = "ss-spidertron-dock"},
     icon_size = 64, icon_mipmaps = 4,
     flags = {"placeable-player", "player-creation"},
