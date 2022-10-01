@@ -3,6 +3,9 @@
 -- update all existing docked spiders
 
 local spidertron_lib = require("lib.spidertron_lib")
+
+if not global.docks then return end
+
 global.docks = global.docks or {}
 global.spiders = global.spiders or {}
 
@@ -13,14 +16,7 @@ local mark_for_deletion = {}
 for unit_number, dock_data in pairs(global.docks) do
     local dock = dock_data.dock_entity
 
-    -- We had an prior issue where a  bad picker dolly
-    -- handler created a bunch of dummy data. Clean
-    -- it up.
-    -- Edit: Turns out a made a double-boo-boo and my
-    -- custom picker dolly handler never functioned, 
-    -- and thus never created bad data. I'll leave this
-    -- in though.
-    if not dock or not dock.valid or dock.name ~= "ss-spidertron-dock" then
+    if not dock or not dock.valid then
         table.insert(mark_for_deletion, unit_number)
     else
         if dock and dock.valid then
@@ -51,7 +47,7 @@ for unit_number, dock_data in pairs(global.docks) do
                     if docked_spider then
                         docked_spider.destructible = false -- Only dock can be attacked
                         spidertron_lib.deserialise_spidertron(docked_spider, dock_data.serialized_spider)
-                        docked_spider.torso_orientation = 0.6
+                        docked_spider.torso_orientation = 0.58
                         global.spiders[docked_spider.unit_number] = {
                             spider_entity=docked_spider,
                             unit_number=docked_spider.unit_number,
@@ -64,6 +60,17 @@ for unit_number, dock_data in pairs(global.docks) do
                         
                         -- Clean up what's left
                         dock_data.serialized_spider = nil
+
+                        -- Keep a tag here so that if a player updates straight from 
+                        -- < 1.0 to 1.1 then his docks can all be set to `passive` mode
+                        dock_data.was_passive = true
+                    else
+                        error([[
+                            Could not create new docked-spider above dock!
+                            Spider: ]]..docked_name..[[
+                            Surface: ]]..dock.surface.name..[[
+                            Position: ]]..serpent.line(dock.position)..[[
+                        ]])
                     end
                 else
                     -- If the prototype no longer exists then we need to empty this dock's data
@@ -74,10 +81,24 @@ for unit_number, dock_data in pairs(global.docks) do
                 -- but has an spider docked with a serialized spider still in the data
                 -- I might be able to fix that if someone complains. But it shouldn't 
                 -- happen, so, meh.
+                error([[
+                    Somehow lost docked spider's serialized data!
+                    Surface: ]]..dock.surface.name..[[
+                    Position: ]]..serpent.line(dock.position)..[[
+                ]])
             end
         else
             -- This dock entity no longer exists. Odd.
-            table.insert(mark_for_deletion, unit_number)
+            if dock_data.occupied then
+                -- Player might lose a spider
+                error([[
+                    Somehow a track of a occupied dock entity!
+                    unit number: ]]..unit_number..[[
+                ]])
+            else
+                -- Don't really care if it wasnt occupied
+                table.insert(mark_for_deletion, unit_number)
+            end
         end
     end
 end

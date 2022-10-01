@@ -14,7 +14,7 @@ if mods["space-exploration-menu-simulations"] then
                 lame_spider.destroy()
 
                 local dock = surface.create_entity{
-                    name="ss-spidertron-dock", position=position}
+                    name="ss-spidertron-dock-active", position=position}
 
                 local spider = game.surfaces.nauvis.create_entity{
                     name="ss-docked-ss-space-spidertron",
@@ -23,7 +23,7 @@ if mods["space-exploration-menu-simulations"] then
                         dock.position.y + 0.01
                     },
                 }
-                spider.torso_orientation = 0.6
+                spider.torso_orientation = 0.58
                 spider.color = {1, 1, 1, 0.5}
                 
             end
