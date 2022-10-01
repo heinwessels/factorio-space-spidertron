@@ -624,6 +624,7 @@ script.on_event("ss-spidertron-dock-toggle", function(event)
         player = player,
     } -- Will set the mode correctly
     new_dock.health = dock.health
+    new_dock.energy = dock.energy
 
     -- Transfer the data
     local key_blacklist = {
