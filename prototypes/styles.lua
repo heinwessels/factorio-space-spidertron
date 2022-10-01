@@ -2,7 +2,7 @@ local styles = data.raw["gui-style"].default
 
 styles["ss_undock_button"] = {
     type = "button_style",
-    parent = "confirm_button",
+    parent = "green_button",
     horizontal_align = "left",
     tooltip = "space-spidertron-dock.undock-tooltip"
 }
