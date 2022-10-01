@@ -2,6 +2,8 @@
 -- actual spidertron entities. This script should
 -- update all existing docked spiders
 
+if not global.docks then return end
+
 local spidertron_lib = require("lib.spidertron_lib")
 global.docks = global.docks or {}
 global.spiders = global.spiders or {}
@@ -84,7 +86,7 @@ for unit_number, dock_data in pairs(global.docks) do
 
             -- Let's find the actual dock entity and link it
             local dock = spider.surface.find_entity("ss-spidertron-dock-active", spider.position)
-             if not dock then error([[
+            if not dock then error([[
                 Could not find dock beneath spider!
                 Spider: ]]..spider.name..[[
                 Surface: ]]..spider.surface.name..[[
@@ -108,8 +110,15 @@ for unit_number, dock_data in pairs(global.docks) do
                     force = dock.force,
                     create_build_effect_smoke = false,
                     raise_built = true,
-                    player = player,
                 }
+                if not new_dock then
+                    error([[
+                        Could not create new dock version!
+                        Dock typer: ss-spidertron-dock-passive
+                        Surface: ]]..dock.surface.name..[[
+                        Position: ]]..serpent.line(dock.position)..[[
+                    ]])
+                end
                 new_dock.health = dock.health  
                 
                 -- Transfer the dock data
@@ -134,11 +143,9 @@ for unit_number, dock_data in pairs(global.docks) do
                 -- Transfer the spider from active to passive
                 do
                     -- dock_from_active_to_serialised
-                    local docked_spider = new_dock_data.docked_spider
-                    if not docked_spider or not docked_spider.valid then return end
-                    local serialised_spider = spidertron_lib.serialise_spidertron(docked_spider)
-                    global.spiders[docked_spider.unit_number] = nil -- Because no destroy event will be called
-                    docked_spider.destroy{raise_destroy=false}      -- False because it's not a real spider
+                    local serialised_spider = spidertron_lib.serialise_spidertron(spider)
+                    global.spiders[spider.unit_number] = nil -- Because no destroy event will be called
+                    spider.destroy{raise_destroy=false}      -- False because it's not a real spider
                     new_dock_data.docked_spider = nil
 
                     -- dock_from_serialised_to_passive
@@ -153,11 +160,11 @@ for unit_number, dock_data in pairs(global.docks) do
         else
             -- The docked spider became invalid. It's likely not supported anymore
             -- Then just delete the dock data. This spider is lost to the player
+            -- just like any modded entity
             table.insert(mark_for_deletion, unit_number)
         end
     else
-        -- We lost reference to the dock entity, and don't have a spider
-        -- to find it through. So lets just destroy it
+        -- This dock is not occupied. Delete it I guess
         table.insert(mark_for_deletion, unit_number)
     end
 end
