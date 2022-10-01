@@ -4,6 +4,7 @@ Date: 01.10.2022
   Bugfixes:
     - Fix specific dock crash after migration issue. (Thanks Alphaprime!)
     - Changing dock mode will no longer drain the accumulator.
+    - Fix another unrelated migration issue.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 01.10.2022

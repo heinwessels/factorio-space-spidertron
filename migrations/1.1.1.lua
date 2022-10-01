@@ -22,7 +22,8 @@ end
 -- as the source of truth
 for _, unit_number in pairs(marked_for_fixing) do
     local dock_data = global.docks[unit_number]
-    local dock = dock_data.dock_entitydock_data.unit_number = dock.unit_number
+    local dock = dock_data.dock_entity
+    dock_data.unit_number = dock.unit_number
     global.docks[dock.unit_number] = dock_data
     if unit_number ~= dock.unit_number then
         global.docks[unit_number] = nil

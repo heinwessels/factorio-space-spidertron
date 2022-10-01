@@ -77,15 +77,17 @@ for unit_number, dock_data in pairs(global.docks) do
                     table.insert(mark_for_deletion, unit_number)
                 end
             else
-                -- If this doesn't work then a dock will remain that looks empty
-                -- but has an spider docked with a serialized spider still in the data
-                -- I might be able to fix that if someone complains. But it shouldn't 
-                -- happen, so, meh.
-                error([[
-                    Somehow lost docked spider's serialized data!
-                    Surface: ]]..dock.surface.name..[[
-                    Position: ]]..serpent.line(dock.position)..[[
-                ]])
+                -- This is only an issue if the dock is occupied
+                if dock_data.occupied then
+                    error([[
+                        Somehow lost docked spider's serialized data!
+                        Surface: ]]..dock.surface.name..[[
+                        Position: ]]..serpent.line(dock.position)..[[
+                    ]])
+                else
+                    -- Meh, just delete the data
+                    table.insert(mark_for_deletion, unit_number)
+                end
             end
         else
             -- This dock entity no longer exists. Odd.
