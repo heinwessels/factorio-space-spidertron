@@ -89,7 +89,7 @@ for unit_number, dock_data in pairs(global.docks) do
             end
         else
             -- This dock entity no longer exists. Odd.
-            if dock_data.occupied then
+            if dock_data.occupied and not dock_data.serialized_spider then
                 -- Player might lose a spider
                 error([[
                     Somehow a track of a occupied dock entity!

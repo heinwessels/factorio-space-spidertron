@@ -22,8 +22,21 @@ end
 -- as the source of truth
 for _, unit_number in pairs(marked_for_fixing) do
     local dock_data = global.docks[unit_number]
-    local dock = dock_data.dock_entity
-    dock_data.unit_number = dock.unit_number
+    local dock = dock_data.dock_entitydock_data.unit_number = dock.unit_number
     global.docks[dock.unit_number] = dock_data
-    global.docks[unit_number] = nil
+    if unit_number ~= dock.unit_number then
+        global.docks[unit_number] = nil
+    end
+end
+
+-- Clean up GUI's which might still be connected to
+-- the old dock number.
+for _, player in pairs(game.players) do
+    if player.valid and player.gui then  -- I don't know if this is neccesary
+        for _, child in pairs(player.gui.relative.children) do
+            if child.name == "ss-spidertron-dock" then
+                child.destroy() 
+            end
+        end
+    end
 end
