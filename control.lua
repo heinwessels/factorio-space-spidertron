@@ -437,7 +437,7 @@ function attempt_dock(spider)
     end
 end
 
-function attempt_undock(dock_data, force)
+function attempt_undock(dock_data, player, force)
     if not dock_data.occupied then return end
     local dock = dock_data.dock_entity
     if not dock then error("dock_data had no associated entity") end
@@ -473,11 +473,18 @@ function attempt_undock(dock_data, force)
     -- Undock the spider!
     local spider = undock_spider(dock)
 
+    -- close the gui since player likely just wanted to undock he spider
+    if player then
+        player.opened = nil
+    end
+
     -- Destroy GUI for all players
     for _, player in pairs(game.players) do
         update_spider_gui_for_player(player, spider)
         update_dock_gui_for_player(player, dock)
     end
+
+    -- pl
 end
 
 script.on_event(defines.events.on_spider_command_completed, 
@@ -565,9 +572,10 @@ script.on_event(defines.events.script_raised_built, on_built)
 function on_deconstructed(event)
     -- When the dock is destroyed then attempt undock the spider
     local entity = event.entity
+    local player = event.player_index and game.get_player(event.player_index) or nil
     if entity and entity.valid then
         if name_is_dock(entity.name) then
-            attempt_undock(get_dock_data_from_entity(entity), true)
+            attempt_undock(get_dock_data_from_entity(entity), player, true)
             global.docks[entity.unit_number] = nil
         elseif entity.type == "spider-vehicle" then
             if name_is_docked_spider(entity.name) then
@@ -575,7 +583,7 @@ function on_deconstructed(event)
                 local dock = spider_data.armed_for
                 if not dock or not dock.valid then return end
                 local dock_data = get_dock_data_from_entity(dock)
-                attempt_undock(dock_data, true)
+                attempt_undock(dock_data, player, true)
             else
                 global.spiders[entity.unit_number] = nil
             end
@@ -878,6 +886,7 @@ end)
 -- spidertron gui
 script.on_event(defines.events.on_gui_click, function(event)
     local element = event.element
+    local player = game.get_player(event.player_index)
     if element.name == "spidertron-undock-button" then
         local parent = element.parent 
         local dock_data = nil        
@@ -891,7 +900,7 @@ script.on_event(defines.events.on_gui_click, function(event)
             dock_data = get_dock_data_from_entity(spider_data.armed_for)
         end
         if not dock_data then return end
-        attempt_undock(dock_data)
+        attempt_undock(dock_data, player)
     end
 end)
 
@@ -913,7 +922,7 @@ local function sanitize_docks()
                     if not global.spider_whitelist[dock_data.spider_name] then
                         -- This spider is no longer supported. We can undock the spider though
                         -- because we still have the serialized information
-                        attempt_undock(dock_data, true)
+                        attempt_undock(dock_data, nil, true)
                         table.insert(marked_for_deletion, unit_number)
                     end
                 end
