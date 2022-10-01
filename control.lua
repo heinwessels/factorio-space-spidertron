@@ -738,17 +738,12 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                     end
                 else
                     -- 'passive' mode
-                    for _, sprite in pairs(source_dock_data.docked_sprites) do
-                        rendering.destroy(sprite)
-                    end
-                    source_dock_data.docked_sprites = {}
+                    pop_dock_sprites(source_dock_data)
                     draw_docked_spider(
                         destination,
                         destination_dock_data.spider_name,
                         destination_dock_data.serialised_spider.color
                     )
-
-
                 end
 
                 -- Remove the old dock data entry
