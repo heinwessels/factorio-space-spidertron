@@ -268,7 +268,7 @@ local function safely_insert_description(descriptions, addition)
         if (#descriptions + 1) < 19 then
             table.insert(descriptions, addition)
         else
-            table.insert(dock_active_description, {"space-spidertron-dock.etc"})
+            table.insert(descriptions, {"space-spidertron-dock.etc"})
         end
     end
 end
