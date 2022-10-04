@@ -2,6 +2,7 @@
 Version: 1.1.2
 Date: 04.10.2022
   Bugfixes:
+    - Fix compatability with AAI Programmable Vehicles that wasn't blacklisted enough.
     - Fix regression crash when adding many dockable spidertrons. (Thanks Soggs!)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1

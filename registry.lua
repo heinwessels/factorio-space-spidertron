@@ -22,12 +22,6 @@ local black_list = {
 local black_list_regex = {
     -- Spidertron Enhancements also has dummy spiders
     "spidertron[-]enhancements[-]dummy[-]",
-
-    -- AAI Programmable Vehicles compatability:
-    -- We don't display the AI version of the spider. Such spiders usually
-    -- end with "-rocket-1" or something. This is a silly check, but should
-    -- be good enough for now.
-    "-[0-9]+$",
 }
     
 -- Will not touch these entities collision boxes
@@ -39,15 +33,26 @@ local collision_black_list = {
     ["constructron-rocket-powered"] = true,
 }
 
-function registry.is_blacklisted(spider_name)
+function registry.is_blacklisted(spider)
     for _, r in pairs(black_list_regex) do
-        if string.match(spider_name, r) then return true end
+        if string.match(spider.name, r) then return true end
     end
-    return black_list[spider_name]
+
+    -- Special check for AAI Programmable vehicles because the naming
+    -- is hard to decern whether it's AI or not.
+    if spider.localised_name then
+        for _, key in pairs(spider.localised_name) do
+            if key == "split-vehicle" or key == "split-vehicle-with" then
+                return true
+            end
+        end
+    end
+
+    return black_list[spider.name]
 end
 
-function registry.blacklisted_for_collision(spider_name)
-    return registry.is_blacklisted(spider_name) or collision_black_list[spider_name]
+function registry.blacklisted_for_collision(spider)
+    return registry.is_blacklisted(spider) or collision_black_list[spider.name]
 end
 
 return registry

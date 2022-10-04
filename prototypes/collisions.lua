@@ -38,7 +38,7 @@ local space_layer =
 
 for _, spider in pairs(data.raw["spider-vehicle"]) do
     if spider.name ~= "ss-space-spidertron" 
-            and not registry.blacklisted_for_collision(spider.name)
+            and not registry.blacklisted_for_collision(spider)
             and not spider.se_allow_in_space then 
         spider.collision_mask = spider.collision_mask or {}
         collision_mask_util_extended.add_layer(spider.collision_mask, space_layer)

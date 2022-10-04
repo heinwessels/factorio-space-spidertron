@@ -279,7 +279,7 @@ local docked_spiders = {}   -- Cannot insert in the loop, otherwise infinite loo
 local dock_active_description = data.raw.accumulator["ss-spidertron-dock-active"].localised_description
 local dock_passive_description = data.raw.accumulator["ss-spidertron-dock-passive"].localised_description
 for _, spider in pairs(data.raw["spider-vehicle"]) do
-    if not registry.is_blacklisted(spider.name) then
+    if not registry.is_blacklisted(spider) then
         local docked_spider = attempt_docked_spider(spider)
         if docked_spider then 
             table.insert(docked_spiders, docked_spider)
