@@ -483,8 +483,6 @@ function attempt_undock(dock_data, player, force)
         update_spider_gui_for_player(player, spider)
         update_dock_gui_for_player(player, dock)
     end
-
-    -- pl
 end
 
 script.on_event(defines.events.on_spider_command_completed, 
@@ -497,36 +495,29 @@ script.on_event(defines.events.on_spider_command_completed,
     end
 )
 
-script.on_event(defines.events.on_player_used_spider_remote , 
+script.on_event(defines.events.on_player_used_spider_remote,
     function (event)
         local spider = event.vehicle
         if spider and spider.valid then
+            local spider_data = get_spider_data_from_entity(spider)
 
-            -- First check if this is a docked spider. If it is, ignore this
-            -- spider remote command
+            -- First check if this is a docked spider. If it is, then
+            -- will attempt an undock.
             if name_is_docked_spider(spider.name) then
-                -- This is a docked spider! Prevent the auto pilot
-                spider.follow_target = nil
-                spider.autopilot_destination = nil
-
-                -- Let the player know
-                spider.surface.play_sound{path="ss-no-no", position=spider.position}
-                spider.surface.create_entity{
-                    name = "flying-text",
-                    position = spider.position,
-                    text = {"space-spidertron-dock.cannot-command"},
-                    color = {r=1,g=1,b=1,a=1},
-                }
-                
-                -- Don't do anything else
+                local dock = spider_data.armed_for
+                if not dock or not dock.valid then return end
+                local dock_data = get_dock_data_from_entity(dock)
+                local player = game.get_player(event.player_index)
+                attempt_undock(dock_data, player, player.force)
                 return
             end
-
+            
+            -- Now we know the current spider is not a docked version. Check if the player
+            -- is directing a spider to a dock to dock the spider
             local dock = spider.surface.find_entity("ss-spidertron-dock-active", event.position)
             if not dock then
                 dock = spider.surface.find_entity("ss-spidertron-dock-passive", event.position)
             end
-            local spider_data = get_spider_data_from_entity(spider)
             if dock then
                 -- This waypoint was placed on a valid dock!
                 -- Arm the dock so that spider is allowed to dock there
