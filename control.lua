@@ -484,6 +484,8 @@ function attempt_undock(dock_data, player, force)
         update_spider_gui_for_player(player, spider)
         update_dock_gui_for_player(player, dock)
     end
+
+    return true
 end
 
 script.on_event(defines.events.on_spider_command_completed, 
@@ -509,7 +511,12 @@ script.on_event(defines.events.on_player_used_spider_remote,
                 if not dock or not dock.valid then return end
                 local dock_data = get_dock_data_from_entity(dock)
                 local player = game.get_player(event.player_index)
-                attempt_undock(dock_data, player, player.force)
+                if not attempt_undock(dock_data, player, player.force) and spider.valid then
+                    -- This was not a successfull undock event. Prevent
+                    -- the remote from moving the still-docked spider!
+                    spider.follow_target = nil
+                    spider.autopilot_destination = nil
+                end
                 return
             end
             
