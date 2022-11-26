@@ -721,22 +721,12 @@ script.on_event(defines.events.on_entity_cloned , function(event)
                     local spider_data = get_spider_data_from_entity(docked_spider)
                     spider_data.armed_for = destination 
 
-                    -- Workaround for engine bug where
-                    -- remote connections are lost
-                    -- forums.factorio.com/103519
-                    local connected_remotes = {}
-                    spidertron_lib.find_remotes(docked_spider, connected_remotes)
-
                     -- Move spider entity
                     docked_spider.teleport({
                         destination.position.x,
                         destination.position.y + 0.01 -- To draw spidertron over dock entity
                     }, destination.surface)
-                    
-                    -- Recreate connections
-                    for _, remote_stack in pairs(connected_remotes) do
-                        remote_stack.connected_entity = docked_spider
-                    end
+
                 else
                     -- 'passive' mode
                     pop_dock_sprites(source_dock_data)
