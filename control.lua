@@ -380,6 +380,7 @@ function undock_spider(dock)
     local dock_data = get_dock_data_from_entity(dock)
 
     -- Some smoke and mirrors
+    dock.create_build_effect_smoke()
     dock.surface.play_sound{path="ss-spidertron-undock-1", position=dock.position}
     dock.surface.play_sound{path="ss-spidertron-undock-2", position=dock.position}
 

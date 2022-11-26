@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
-Date: ??.11.2022
+Date: 26.11.2022
   Features:
     - Using a remote on an actively docked spidertron now undocks the spidertron instead of denying the action.
   Changes:
     - Remove workaround for Factorio bug when spidertron remote connections are lost in certain occations which is now resolved (103519).
+    - Added smoke effect when undocking spidertron.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 04.10.2022
