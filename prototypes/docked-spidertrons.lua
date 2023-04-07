@@ -64,8 +64,6 @@ function attempt_build_sprite(spider)
     --      Tint: Only the tinted layers to give the docked spider the correct colours
     --      Shadow: Yup...
 
-    if not spider.minable then return end
-    
     if not spider.graphics_set then return end
     if not spider.graphics_set.base_animation then return end
     if not spider.graphics_set.animation then return end
@@ -181,9 +179,7 @@ end
 -- a spider type is dockable
 function attempt_docked_spider(spider)
     
-    -- Some basic checks
-    if not spider.minable then return end
-    if not spider.minable then return end    
+    -- Some basic checks    
     if not spider.graphics_set then return end
     if not spider.graphics_set.base_animation then return end
     if not spider.graphics_set.animation then return end
