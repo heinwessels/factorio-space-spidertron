@@ -34,7 +34,3 @@ table.insert(spider_tech.effects, {
     type = "unlock-recipe",
     recipe = "ss-space-spidertron"
 })
-table.insert(spider_tech.effects, {
-    type = "unlock-recipe",
-    recipe = "ss-spidertron-dock"
-})

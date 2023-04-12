@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.0
+Date: ??.??.2023
+  Features:
+    - Previous version of Space Spidertron needs to bet V1.2 or newer.
+    - Spidertron Dock is now a separate mod.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.3
 Date: 07.04.2023
   Bugfixes:

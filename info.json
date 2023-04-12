@@ -6,6 +6,7 @@
 	"factorio_version": "1.1",
 	"dependencies": [
 		"base >= 1.1.70",
+		"spidertron-dock",
 		"? space-exploration",
 		"(?) Krastorio2"
 	],
