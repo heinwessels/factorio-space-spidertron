@@ -1,4 +1,6 @@
-function on_built(event)
+local util = require("__core__/lualib/util")
+
+local function on_built(event)
     -- If it's a space spidertron, set it to white as default
     local entity = event.created_entity or event.entity
     if entity and entity.valid then
