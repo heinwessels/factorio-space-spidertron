@@ -8,6 +8,7 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug",
+            "hookControl": ["space-spidertron"],
             // "hookData": true,
         },
         {
