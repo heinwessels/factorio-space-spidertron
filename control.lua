@@ -25,4 +25,11 @@ script.on_event(defines.events.on_robot_built_entity, on_built)
 script.on_event(defines.events.on_built_entity, on_built)
 script.on_event(defines.events.script_raised_built, on_built)
 
--- TODO (HW): Verify that the player can only update to this if player was at least on v1.2.
+script.on_configuration_changed(function (event)
+    -- Spidertron Dock was split off from Space Spidertron, so we need to move
+    -- the global dock data from this mod to Spidertron Dock, which is also
+    -- why this mod is dependent on that mod.
+    if not next(global) then return end -- Return early if there's no data anyway
+    remote.call("spidertron-dock", "migrate_data",  global)
+    for k, _ in pairs(global) do global[k] = nil end -- Clear global
+end)
