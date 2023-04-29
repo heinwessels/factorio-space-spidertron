@@ -7,6 +7,8 @@
 
 A flying spidertron capable of traversing in the zero-gravity environment of space. These spidertrons have the same properties as normal spidertrons except it hovers using a rocket engine, and has no guns (yet). Therefore they are perfect builders for your space bases where there might not be scaffolding everywhere to walk. Now you have a friend you can leave behind in the remote astroid field that will happily help you fix your inevitable mistakes.
 
+**Note:** The docking functionality has been split off into a standalone mod called [Spidertron Dock](https://mods.factorio.com/mod/spidertron-dock).
+
 # Credits
 - [Kirazy](https://mods.factorio.com/user/Kirazy) for the Spidertron eye mask
 - [Xorimuth](https://mods.factorio.com/user/Xorimuth) for implementing the ability to change a spider's bouncing speed in Factorio!

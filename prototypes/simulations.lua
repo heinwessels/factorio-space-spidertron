@@ -1,4 +1,4 @@
-if mods["space-exploration-menu-simulations"] then
+if mods["space-exploration-menu-simulations"] and mods["spidertron-dock"] then
     -- Let's sneak in there
 
     -- Get the simulation I want to tweak
