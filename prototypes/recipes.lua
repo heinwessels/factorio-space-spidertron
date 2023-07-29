@@ -1,3 +1,9 @@
+if mods["aai-programmable-vehicles"] then
+    -- See comment about AAI in data.lua
+    data.raw["recipe"]["ss-space-spidertron"] = nil
+end
+
+
 local spider_recipe = util.merge{
     data.raw["recipe"]["spidertron"],
     {

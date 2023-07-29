@@ -1,6 +1,6 @@
 {
 	"name": "space-spidertron",
-	"version": "1.3.0",
+	"version": "1.3.1",
 	"title": "Space Spidertron",
 	"author": "stringweasel",	
 	"factorio_version": "1.1",
@@ -8,6 +8,7 @@
 		"base >= 1.1.70",
 		"spidertron-dock",
 		"? space-exploration",
+		"(?) aai-programmable-vehicles",
 		"(?) Krastorio2"
 	],
 	"description": "A flying spidertron capable of traversing in the zero-gravity environment of space designed to be used with Space Exploration. Prevents regular spidertron's from walking in space, which can be turned off in settings."
