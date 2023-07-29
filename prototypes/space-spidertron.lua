@@ -47,7 +47,7 @@ local spider = {
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
   collision_mask = {},
   minable = {result = "ss-space-spidertron", mining_time = 1},
-  max_health = 250,
+  max_health = 4000, -- Spidertron is 4000.
   resistances =
   {
     {
