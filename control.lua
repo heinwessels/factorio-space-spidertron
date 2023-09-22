@@ -30,6 +30,15 @@ script.on_configuration_changed(function (event)
     -- the global dock data from this mod to Spidertron Dock, which is also
     -- why this mod is dependent on that mod.
     if not next(global) then return end -- Return early if there's no data anyway
-    remote.call("spidertron-dock", "migrate_data",  global)
+    if script.active_mods["spidertron-dock"] then 
+        remote.call("spidertron-dock", "migrate_data",  global)
+    else
+        -- There is dock data contained in this mod, but the Spidertron Dock
+        -- mod is not installed to offload the dock data. The player will lose
+        -- all docks. Do I do a warning or an error?
+        -- I'm going to print a big red error, just like SE does. Maybe the player
+        -- just doesn't want to play with the docks.
+        game.print({"space-spidertron.warning-docks-removed"})
+    end
     for k, _ in pairs(global) do global[k] = nil end -- Clear global
 end)
