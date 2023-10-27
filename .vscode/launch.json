@@ -9,7 +9,13 @@
             "request": "launch",
             "name": "Factorio Mod Debug",
             "hookControl": ["space-spidertron"],
-            // "hookData": true,
+        },
+        {
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Debug (Data)",
+            "hookControl": ["space-spidertron"],
+            "hookData": true,
         },
         {
             "type": "factoriomod",

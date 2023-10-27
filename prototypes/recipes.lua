@@ -4,21 +4,23 @@ if mods["aai-programmable-vehicles"] then
 end
 
 
-local spider_recipe = util.merge{
-    data.raw["recipe"]["spidertron"],
-    {
-        name = "ss-space-spidertron"
-    }
-}
+local spider_recipe = util.table.deepcopy(data.raw["recipe"]["spidertron"])
+if not spider_recipe then error("No spider recipe found! Should I handle this? Probably.") end
+spider_recipe.name = "ss-space-spidertron"
 
 -- It's really stupid that ingredients can be in 
 -- two different places. I guess they can't change
 -- it now though cause it would break sooooo
 -- many mods.
-local spider_ingredients = spider_recipe.ingredients 
-        or spider_recipe.normal.ingredients
-if spider_recipe.result then
+-- Update a year later: Don't forget, products are 
+-- twice as annoying as ingredients!
+local spider_ingredients = spider_recipe.ingredients or spider_recipe.normal.ingredients
+if spider_recipe.results then
+    spider_recipe.results = {{type = "item", name = "ss-space-spidertron", amount = 1}}
+elseif spider_recipe.result then
     spider_recipe.result = "ss-space-spidertron"
+elseif spider_recipe.normal.results then
+    spider_recipe.normal.results = {{type = "item", name = "ss-space-spidertron", amount = 1}}
 else
     spider_recipe.normal.result = "ss-space-spidertron"
 end
@@ -30,7 +32,7 @@ local function remove_ingredient(ingredients, ingredient_name)
                 table.remove(ingredients, index)
                 
                 -- This loop is now broken, 
-                --and we got what we're looking for
+                -- and we got what we're looking for
                 return true
             end
         end
