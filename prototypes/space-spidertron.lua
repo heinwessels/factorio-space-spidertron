@@ -1,4 +1,5 @@
 local util = require("__core__/lualib/util")
+local item_sounds = require("__base__.prototypes.item_sounds")
 
 local localised_description = nil
 if mods["space-exploration"] then
@@ -45,7 +46,7 @@ local spider = {
   friction_force = 1,
   torso_bob_speed = 0.2,
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
-  collision_mask = {},
+  collision_mask = { layers = { } },
   minable = {result = "ss-space-spidertron", mining_time = 1},
   max_health = 4000, -- Spidertron is 4000.
   resistances =
@@ -103,7 +104,10 @@ local spider = {
   torso_rotation_speed = 0.2,
   chunk_exploration_radius = 3,
   selection_priority = 51,
-  graphics_set = spidertron_torso_graphics_set(1),
+  graphics_set = util.merge{
+    spidertron_torso_graphics_set(1),
+    { default_color = {1, 1, 1, 0.5} } -- white 
+  },
   energy_source =
   {
     type = "void"
@@ -119,8 +123,7 @@ local spider = {
         leg = "ss-space-spidertron-leg",
         mount_position = {0, -1},
         ground_position = {0, -1},
-        blocking_legs = {1},
-        leg_hit_the_ground_trigger = nil
+        walking_group = 1,
       }
     },
     military_target = "spidertron-military-target"
@@ -155,69 +158,42 @@ end
 
 local torso_bottom_layers = spider.graphics_set.base_animation.layers
 torso_bottom_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/space-spidertron-body-bottom.png"
-torso_bottom_layers[1].hr_version.filename = "__space-spidertron__/graphics/space-spidertron/hr-space-spidertron-body-bottom.png"
 
 local torso_body_layers = spider.graphics_set.animation.layers
-torso_body_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/spidertron-body.png"
-torso_body_layers[1].hr_version.filename = "__space-spidertron__/graphics/space-spidertron/hr-space-spidertron-body.png"
+torso_body_layers[1].filename = "__space-spidertron__/graphics/space-spidertron/space-spidertron-body.png"
 
 -- Recolour eyes 
 -- TODO Add highlight
 table.insert(torso_body_layers, {
     filename = "__space-spidertron__/graphics/space-spidertron/spidertron-eyes-all-mask.png",
-    width = 66,
-    height = 70,
+    width = 132,
+    height = 138,
     line_length = 8,
     direction_count = 64,
     tint = util.color("0080ff"),
     shift = util.by_pixel(0, -19),
-    hr_version = {
-        filename = "__space-spidertron__/graphics/space-spidertron/hr-spidertron-eyes-all-mask.png",
-        width = 132,
-        height = 138,
-        line_length = 8,
-        direction_count = 64,
-        tint = util.color("0080ff"),
-        shift = util.by_pixel(0, -19),
-        scale = 0.5,
-    }
+    scale = 0.5,
 })
 
 -- Add flame
 local flame_scale = 2
-for k, layer in pairs (torso_bottom_layers) do
+for _, layer in pairs (torso_bottom_layers) do
   layer.repeat_count = 8
-  layer.hr_version.repeat_count = 8
 end
 table.insert(torso_bottom_layers, 1, {
   filename = "__base__/graphics/entity/rocket-silo/10-jet-flame.png",
   priority = "medium",
   blend_mode = "additive",
   draw_as_glow = true,
-  width = 87,
-  height = 128,
+  width = 172,
+  height = 256,
   frame_count = 8,
   line_length = 8,
   animation_speed = 0.5,
-  scale = flame_scale/4,
+  scale = flame_scale/8,
   tint = util.color("0080ff"),
-  shift = util.by_pixel(-0.5, 30),
+  shift = util.by_pixel(-1, 30),
   direction_count = 1,
-  hr_version = {
-    filename = "__base__/graphics/entity/rocket-silo/hr-10-jet-flame.png",
-    priority = "medium",
-    blend_mode = "additive",
-    draw_as_glow = true,
-    width = 172,
-    height = 256,
-    frame_count = 8,
-    line_length = 8,
-    animation_speed = 0.5,
-    scale = flame_scale/8,
-    tint = util.color("0080ff"),
-    shift = util.by_pixel(-1, 30),
-    direction_count = 1,
-  }
 })
 
 -- Add leg
@@ -234,18 +210,19 @@ local spider_leg = {
     collision_box = {{-0.05, -0.05}, {0.05, 0.05}},
     selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
     icon = "__base__/graphics/icons/spidertron.png",
-    icon_size = 64, icon_mipmaps = 4,
-    walking_sound_volume_modifier = 0,
-    target_position_randomisation_distance = 0,
-    minimal_step_size = 0,
-    working_sound = nil,
-    part_length = 5,
+    collision_mask = { layers = { } },
+    target_position_randomisation_distance = 0.25,
+    minimal_step_size = 4,
+    stretch_force_scalar = 1,
+    knee_height = 2.5,
+    knee_distance_factor = 0.4,
     initial_movement_speed = 100,
     movement_acceleration = 100,
     max_health = 100,
-    movement_based_position_selection_distance = 3,
+    base_position_selection_distance = 6,
+    movement_based_position_selection_distance = 4,
     selectable_in_game = false,
-    graphics_set = create_spidertron_leg_graphics_set(0, 1)
+    alert_when_damaged = false,
 }
 
 -- Add item
@@ -258,8 +235,12 @@ local spider_item =   {
     icon_tintable_mask = "__space-spidertron__/graphics/space-spidertron/space-spidertron-icon-tintable-mask.png",
     icon_size = 64, icon_mipmaps = 4,
     subgroup = "transport",
-    order = "b[personal-transport]-c[spidertron]-a[zspace-spider]", -- "z" to be placed after normal spider
+    order =  "b[personal-transport]-c[spidertron]-b[space-spider]",
+    inventory_move_sound = item_sounds.spidertron_inventory_move,
+    pick_sound = item_sounds.spidertron_inventory_pickup,
+    drop_sound = item_sounds.spidertron_inventory_move,
     place_result = "ss-space-spidertron",
+    weight = 1 * tons,
     stack_size = 1
 }
 

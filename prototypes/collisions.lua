@@ -1,3 +1,6 @@
+do return end -- FIXME
+
+
 -----------------------------------------------------------------
 -- Add a collision between Space Spidertron and `out-of-map` tiles
 -- Note:

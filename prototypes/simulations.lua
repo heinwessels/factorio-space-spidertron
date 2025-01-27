@@ -4,7 +4,7 @@ if mods["space-exploration-menu-simulations"] and mods["spidertron-dock"] then
     -- Get the simulation I want to tweak
     local menu_simulations = data.raw["utility-constants"]["default"].main_menu_simulations
     local spaceship_dual_shuttles = menu_simulations.spaceship_dual_shuttles
-    
+
     if spaceship_dual_shuttles then
         spaceship_dual_shuttles.init = spaceship_dual_shuttles.init..[[
             local lame_spider = game.surfaces.nauvis.find_entities_filtered{name = "spidertron", limit = 1}[1]
