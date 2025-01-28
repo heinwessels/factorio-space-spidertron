@@ -1,10 +1,8 @@
 local util = require("__core__/lualib/util")
 
-do return end
-
 local function on_built(event)
     -- If it's a space spidertron, set it to white as default
-    local entity = event.created_entity or event.entity
+    local entity = event.entity
     if entity and entity.valid then
         if entity.name == "ss-space-spidertron" then
             -- We only want to set it when the user has not set it
@@ -31,9 +29,9 @@ script.on_configuration_changed(function (event)
     -- Spidertron Dock was split off from Space Spidertron, so we need to move
     -- the global dock data from this mod to Spidertron Dock, which is also
     -- why this mod is dependent on that mod.
-    if not next(global) then return end -- Return early if there's no data anyway
+    if not next(storage) then return end -- Return early if there's no data anyway
     if script.active_mods["spidertron-dock"] then 
-        remote.call("spidertron-dock", "migrate_data",  global)
+        remote.call("spidertron-dock", "migrate_data",  storage)
     else
         -- There is dock data contained in this mod, but the Spidertron Dock
         -- mod is not installed to offload the dock data. The player will lose
@@ -42,5 +40,5 @@ script.on_configuration_changed(function (event)
         -- just doesn't want to play with the docks.
         game.print({"space-spidertron.warning-docks-removed"})
     end
-    for k, _ in pairs(global) do global[k] = nil end -- Clear global
+    for k, _ in pairs(storage) do storage[k] = nil end -- Clear global
 end)

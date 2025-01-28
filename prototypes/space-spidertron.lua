@@ -205,9 +205,8 @@ end
 local spider_leg = {
     type = "spider-leg",
     name = "ss-space-spidertron-leg",
-
     localised_name = {"entity-name.spidertron-leg"},
-    collision_box = {{-0.05, -0.05}, {0.05, 0.05}},
+    collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
     selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
     icon = "__base__/graphics/icons/spidertron.png",
     collision_mask = { layers = { } },

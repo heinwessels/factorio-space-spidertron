@@ -6,5 +6,6 @@ data:extend({
         setting_type = "startup",
         order = "m",
         default_value = false,
+        hidden = mods["space-exploration"] == nil,
     }
 })
