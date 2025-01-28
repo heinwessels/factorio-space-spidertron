@@ -4,6 +4,8 @@ local item_sounds = require("__base__.prototypes.item_sounds")
 local localised_description = nil
 if mods["space-exploration"] then
   localised_description = {"", {"space-spidertron.description-se"}}
+elseif mods["space-age"] then
+  localised_description = {"", {"space-spidertron.description-sa"}}
 end
 
 local spider = {
@@ -129,6 +131,13 @@ local spider = {
     military_target = "spidertron-military-target"
   },
 }
+
+if mods["space-age"] then
+  spider.surface_conditions = {{
+    property = "gravity",
+    min = 1
+  }}
+end
 
 if mods["Krastorio2"] then
   -- K2 does some custom things to all spidertrons.

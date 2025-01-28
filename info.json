@@ -7,9 +7,9 @@
 	"dependencies": [
 		"base >= 2.0.0",
 		"? spidertron-dock",
-		"? space-exploration",
+		"? space-exploration > 0.7.0",
 		"(?) aai-programmable-vehicles",
 		"(?) Krastorio2"
 	],
-	"description": "A flying spidertron capable of traversing in the zero-gravity environment of space designed to be used with Space Exploration. Prevents regular spidertron's from walking in space, which can be turned off in settings."
+	"description": "A flying spidertron. Designed for Space Exploration where it's capable of traversing the zero-gravity environment of space. With Space Age it's a regular flying spidertron. Prevents regular spidertron's from walking in space (configurable)."
 }

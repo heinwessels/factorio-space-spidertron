@@ -1,8 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
-Date: ??.??.2025
+Date: 28.01.2025
   Features:
     - Updated to Factorio 2.0.
+  Compatibility:
+    - [Space Age] Added minimum required gravity of 1 m/s, meaning it cannot be placed on space platforms.
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.3
 Date: 27.10.2023
@@ -17,7 +19,7 @@ Date: 22.09.2023
 Version: 1.3.1
 Date: 29.07.2023
   Changes:
-    - Compatability with AAI Programmable Vehicles (Thanks NightOps).
+    - Compatibility with AAI Programmable Vehicles (Thanks NightOps).
     - Increase Space Spidertron health to 4000 (same as Spidertron).
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
@@ -52,7 +54,7 @@ Date: 26.11.2022
 Version: 1.1.2
 Date: 04.10.2022
   Bugfixes:
-    - Fix compatability with AAI Programmable Vehicles that wasn't blacklisted enough.
+    - Fix Compatibility with AAI Programmable Vehicles that wasn't blacklisted enough.
     - Fix regression crash when adding many dockable spidertrons. (Thanks Soggs!)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
@@ -77,7 +79,7 @@ Date: 24.09.2022
     - Docked spiders are now fully functional.
   Changes:
     - Now requires Factorio 1.1.69 or higher.
-    - Better compatability with Spidertron Enhancements and Spidertron Patrols. (Thanks Xorimuth!)
+    - Better Compatibility with Spidertron Enhancements and Spidertron Patrols. (Thanks Xorimuth!)
     - Changed `Undock` button location.
   Bugfixes:
     - Fix possible crash when docked spider no longer exist after mod change.
@@ -88,7 +90,7 @@ Date: 18.09.2022
     - Space Spidertron now hides in another menu-simulation.
   Changes:
     - Space Spidertron recipe now uses Aeroframe Poles instead of Beryllium Plate. 
-    - Less harsh compatability with Constructron Continued.
+    - Less harsh Compatibility with Constructron Continued.
   Bugfixes:
     - Remove build-smoke during failed undocking attempt.
 ---------------------------------------------------------------------------------------------------
@@ -101,7 +103,7 @@ Date: 15.09.2022
     - Prevent Lex's Aircraft from being dockable.
     - Space Spidertron recipe now has more realistic ingredients.
     - Less harsh checks on which spiders are allowed to dock.
-    - Compatability with Constructron-Continued.
+    - Compatibility with Constructron-Continued.
   Bugfixes:
     - [SE] No longer changes all spider collision masks regardless of if it's blacklisted.
     - Space Spidertron can no longer travel far into `out-of-map` tiles. (Thanks Soggs!)
