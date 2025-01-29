@@ -10,6 +10,6 @@ if mods["aai-programmable-vehicles"] then
         type = "recipe",
         name = "ss-space-spidertron",
         ingredients = { },
-        result =  {{type = "item", name = "ss-space-spidertron", amount = 1}}
+        results =  {{type = "item", name = "ss-space-spidertron", amount = 1}}
     }}
 end

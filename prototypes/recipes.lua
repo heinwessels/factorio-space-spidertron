@@ -1,3 +1,5 @@
+local recycling = mods["quality"] and require("__quality__.prototypes.recycling")
+
 if mods["aai-programmable-vehicles"] then
     -- See comment about AAI in data.lua
     data.raw["recipe"]["ss-space-spidertron"] = nil
@@ -43,3 +45,8 @@ else
 end
 
 data:extend{recipe}
+
+-- Running into this issue: https://forums.factorio.com/124656
+if recycling then
+    recycling.generate_recycling_recipe(recipe)
+end

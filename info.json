@@ -1,6 +1,6 @@
 {
 	"name": "space-spidertron",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"title": "Space Spidertron",
 	"author": "stringweasel",	
 	"factorio_version": "2.0",
@@ -11,5 +11,8 @@
 		"(?) aai-programmable-vehicles",
 		"(?) Krastorio2"
 	],
-	"description": "A flying spidertron. Designed for Space Exploration where it's capable of traversing the zero-gravity environment of space. With Space Age it's a regular flying spidertron. Prevents regular spidertron's from walking in space (configurable)."
+	"description": "A flying spidertron. Designed for Space Exploration where it's capable of traversing the zero-gravity environment of space. With Space Age it's a regular flying spidertron useful on planets like Aquillo.",
+	"package":{
+		"ignore":[ "*.md", "*.zip", "mod-page/*" ]
+	}
 }

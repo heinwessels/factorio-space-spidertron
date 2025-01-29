@@ -190,7 +190,7 @@ for _, layer in pairs (torso_bottom_layers) do
   layer.repeat_count = 8
 end
 table.insert(torso_bottom_layers, 1, {
-  filename = "__base__/graphics/entity/rocket-silo/10-jet-flame.png",
+  filename = "__space-spidertron__/graphics/space-spidertron/10-jet-flame.png",
   priority = "medium",
   blend_mode = "additive",
   draw_as_glow = true,

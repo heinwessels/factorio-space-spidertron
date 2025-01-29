@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 29.01.2025
+  Bugfixes:
+    - Fixed startup crash with Quality and AAI Programmable Vehicles mods enabled. (Thanks Hoochie!)
+    - Fixed no recycling results with the Quality mod. (Thanks tuhud!)
+    - Fixed startup crash with Factorio 2.0.33. (Thanks tuhud!)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 28.01.2025
   Features:
