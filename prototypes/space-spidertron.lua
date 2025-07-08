@@ -150,13 +150,12 @@ if mods["Krastorio2"] then
   spider.movement_energy_consumption = "3MW"
   spider.energy_source = {
     type = "burner",
-    emissions_per_minute = 0,
     effectivity = 1,
     render_no_power_icon = true,
     render_no_network_icon = false,
     fuel_inventory_size = 1,
     burnt_inventory_size = 1,
-    fuel_categories = {"fusion-fuel"},
+    fuel_categories = {"kr-fusion-fuel"},
   }
 
   -- However, if SE is also installed then it's changed again
