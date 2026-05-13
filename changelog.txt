@@ -3,6 +3,7 @@ Version: 2.0.3
 Date: 13.05.2026
   Changes:
     - Space Spidertron can now be remotely driven.
+    - Space Spidertron no longer rolls back after stopping in some cases.
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 29.01.2025

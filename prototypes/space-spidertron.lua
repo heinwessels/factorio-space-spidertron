@@ -231,6 +231,8 @@ local spider_leg = {
     movement_based_position_selection_distance = 4,
     selectable_in_game = false,
     alert_when_damaged = false,
+    walking_sound_volume_modifier = 0,
+    walking_sound_speed_modifier = 0,
 }
 
 -- Add item
