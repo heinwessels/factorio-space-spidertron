@@ -220,7 +220,7 @@ local spider_leg = {
     icon = "__base__/graphics/icons/spidertron.png",
     collision_mask = { layers = { } },
     target_position_randomisation_distance = 0.25,
-    minimal_step_size = 4,
+    minimal_step_size = 0, -- Prevents it from "rolling back" after moving
     stretch_force_scalar = 1,
     knee_height = 2.5,
     knee_distance_factor = 0.4,
