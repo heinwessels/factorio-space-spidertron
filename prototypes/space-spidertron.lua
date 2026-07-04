@@ -232,7 +232,7 @@ local spider_leg = {
     selectable_in_game = false,
     alert_when_damaged = false,
     walking_sound_volume_modifier = 0,
-    walking_sound_speed_modifier = 0,
+    walking_sound_speed_modifier = 1,
 }
 
 -- Add item
