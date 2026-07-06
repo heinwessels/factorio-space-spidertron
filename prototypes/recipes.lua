@@ -1,4 +1,4 @@
-local recycling = mods["quality"] and require("__quality__.prototypes.recycling")
+local recycling = mods["recycling"] and require("__recycler__.prototypes.recycling")
 
 if mods["aai-programmable-vehicles"] then
     -- See comment about AAI in data.lua
